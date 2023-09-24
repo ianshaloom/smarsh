@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "105653625919",
+    "project_id": "smarsh-1f6a8",
+    "storage_bucket": "smarsh-1f6a8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:105653625919:android:ac44418bd4182e92bd048a",
+        "android_client_info": {
+          "package_name": "com.example.smarsh"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDeDljWQ9DExG8MFWV_8SgjHxYr91v2V64"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
