@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 // NOTE Normal Text Form Field
 
 class NormalTextFormField extends StatefulWidget {
-  final TextEditingController? controller;
+  final TextEditingController controller;
   final String labelText;
   final String hintText;
   final String errorText;
@@ -26,6 +26,13 @@ class NormalTextFormField extends StatefulWidget {
 }
 
 class _NormalTextFormFieldState extends State<NormalTextFormField> {
+  
+  
+  @override
+  void dispose() {
+    widget.controller.dispose();
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     return TextFormField(

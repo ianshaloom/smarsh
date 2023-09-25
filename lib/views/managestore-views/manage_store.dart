@@ -304,7 +304,7 @@ class _ManageStorePAgeState extends State<ManageStorePAge> {
 
   // NOTE: Add New Product Page Members
   /* -------------------------------------------------------------------------- */
-late final FirebaseCloudStorage _cloudStorage;
+  late final FirebaseCloudStorage _cloudStorage;
   void _createProduct(CloudProduct product) async {
     // save product to cloud
     try {
@@ -345,11 +345,10 @@ late final FirebaseCloudStorage _cloudStorage;
     Navigator.of(context).pop();
 
     await Future.delayed(const Duration(milliseconds: 500), () {
-      CustomSnackBar.showSnackBar(
+      ErrorUtil.showSnackBar(
           context: context, message: 'Product Added Successfully');
     });
   }
-
 
   /* -------------------------------------------------------------------------- */
 }

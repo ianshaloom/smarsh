@@ -1,14 +1,18 @@
 import 'dart:math';
 
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-// import 'package:flutter_native_splash/flutter_native_splash.dart';
-import 'package:smarsh/firebase_options.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:smarsh/constants/hive_constants.dart';
+import 'package:smarsh/services/auth/email_n_password/auth_service.dart';
+import 'package:path_provider/path_provider.dart' as path_provider;
 
-import 'app.dart';
+
+import 'auth_pages.dart';
 import 'services/cloud/cloud_product.dart';
 import 'services/cloud/firebase_cloud_storage.dart';
+import 'services/hive/models/local_product/local_product_model.dart';
+import 'views/homepage-views/home_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,12 +23,54 @@ void main() async {
     DeviceOrientation.portraitDown, // Portrait mode with the device upside down
   ]);
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await AppService.firebase().initialize();
+  
+  final appDocumentDir = await path_provider.getApplicationDocumentsDirectory();
+  Hive.init(appDocumentDir.path);  
+  await Hive.openBox<LocalProduct>(localProduct);
 
-  runApp(const SmarshApp());
+  runApp(
+    MaterialApp(
+      title: 'Smarsh',
+      theme: ThemeData(
+        brightness: Brightness.dark,
+        fontFamily: 'Montserrat',
+        colorSchemeSeed: Colors.green,
+        useMaterial3: true,
+      ),
+      debugShowCheckedModeBanner: false,
+      home: const SmarshApp(),
+    ),
+  );
 }
+
+
+class SmarshApp extends StatelessWidget {
+  const SmarshApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder(
+      stream: AppService.firebase().authStateChanges,
+      builder: (context, snapshot) {
+        print('Stream is listening');
+
+        if (snapshot.hasData) {
+          // if (snapshot.data!.isEmailVerified == false) {
+          //   AuthService.firebase().sendEmailVerification();
+          //   return const VerifyEmailPage();
+          // }
+
+          print(snapshot.data!.email);
+          return const HomePage();
+        } else {
+          return const LandingPage();
+        }
+      },
+    );
+  }
+}
+
 
 class Shared {
   Shared._();

@@ -1,7 +1,9 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 import '../../auth_pages.dart';
-import '../../services/auth/auth_service.dart';
+import '../../services/auth/email_n_password/auth_service.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -13,7 +15,7 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
-    final user = AuthService.firebase().currentUser;
+    final user = AppService.firebase().currentUser;
 
     return StreamBuilder<Object>(
       stream: AppService.firebase().authStateChanges,
@@ -46,7 +48,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   Container(
                     alignment: Alignment.center,
                     child: CircleAvatar(
-                      backgroundImage: NetworkImage(user!.url, scale: 1),
+                      //backgroundImage: NetworkImage(user!.url, scale: 1),
                       radius: 50,
                     ),
                   ),
@@ -61,7 +63,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ),
                     title: const Text('Name'),
-                    subtitle: Text(user.name),
+                    //subtitle: Text(user.name),
                   ),
                   ListTile(
                     leading: const SizedBox(
@@ -73,7 +75,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ),
                     title: const Text('Email'),
-                    subtitle: Text(user.email),
+                    //subtitle: Text(user.email),
                   ),
                   ListTile(
                     leading: const SizedBox(
@@ -238,13 +240,6 @@ class _ProfilePageState extends State<ProfilePage> {
               actions: [
                 TextButton(
                     onPressed: () {
-                      // Navigator.pushAndRemoveUntil(
-                      //   context,
-                      //   MaterialPageRoute(
-                      //     builder: (context) => const LandingPage(),
-                      //   ),
-                      //   (route) => false,
-                      // );
                       _logOut();
                     },
                     child: const Text('Yes')),
@@ -257,7 +252,22 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _logOut() async {
-    await GoogleService.google().logOut();
+    //TODO - Implement Google Log Out
+    
+    //await GoogleService.google().logOut();
     await AuthService.firebase().logOut();
+
+    final user = AppService.firebase().currentUser;
+    user == null ? _toLandingPage() : debugPrint(user.email);
+  }
+  
+  void _toLandingPage() {
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const LandingPage(),
+      ),
+      (route) => route.isFirst,
+    );
   }
 }

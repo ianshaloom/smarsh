@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../../services/auth/auth_service.dart';
 import '../managestore-views/manage_store.dart';
 import '../profile-views/profile_page.dart';
 import 'stock_list_page.dart';
@@ -11,7 +10,6 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final user = AuthService.firebase().currentUser!;
     final color = Theme.of(context).colorScheme;
     final screenSize = MediaQuery.of(context).size;
 
@@ -35,12 +33,12 @@ class HomePage extends StatelessWidget {
                   Row(
                     children: [
                       CircleAvatar(
-                        backgroundImage: NetworkImage(user.url, scale: 0.1),
+                        //backgroundImage: NetworkImage(user!.url, scale: 0.1),
                         radius: 25,
                       ),
                       const SizedBox(width: 10),
                       Text(
-                        user.name,
+                        'user.name',
                         style: Theme.of(context).textTheme.labelMedium,
                       ),
                     ],

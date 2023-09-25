@@ -241,12 +241,12 @@ class _ManageProductPageState extends State<ManageProductPage> {
     if (isDeleting) {
       Navigator.of(context).pop();
       Navigator.of(context).pop();
-      CustomSnackBar.showSnackBar(
+      ErrorUtil.showSnackBar(
           context: context, message: 'Product deleted successfully');
     } else {
       Navigator.of(context).pop();
       Navigator.of(context).pop();
-      CustomSnackBar.showSnackBar(
+      ErrorUtil.showSnackBar(
           context: context, message: 'Product updated successfully');
     }
   }

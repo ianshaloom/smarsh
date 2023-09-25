@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class CustomSnackBar {
+class ErrorUtil {
   static void showSnackBar({
     required BuildContext context,
     required String message,
