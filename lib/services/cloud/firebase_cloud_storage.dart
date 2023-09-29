@@ -106,6 +106,12 @@ class FirebaseCloudStorage {
     return fetchedProducts;
   }
 
+  FirebaseCloudStorage._sharedInstance();
+  static final FirebaseCloudStorage _shared =
+      FirebaseCloudStorage._sharedInstance();
+  factory FirebaseCloudStorage() => _shared;
+}
+
   // Future<void> deleteProduct({required String documentId}) async {
   //   try {
   //     await stock.doc(documentId).delete();
@@ -145,9 +151,3 @@ class FirebaseCloudStorage {
   //     text: '',
   //   );
   // }
-
-  FirebaseCloudStorage._sharedInstance();
-  static final FirebaseCloudStorage _shared =
-      FirebaseCloudStorage._sharedInstance();
-  factory FirebaseCloudStorage() => _shared;
-}

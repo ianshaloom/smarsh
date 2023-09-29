@@ -1,11 +1,38 @@
 import 'package:hive/hive.dart';
-import 'package:smarsh/constants/hive_constants.dart';
 
+import '../../../constants/hive_constants.dart';
 import '../models/final_count/final_count_model.dart';
 import '../models/hive_object/hive_object_model.dart';
 import '../models/item_count/item_count_model.dart';
 import '../models/local_product/local_product_model.dart';
+import '../models/purchases_item/purchases_item_model.dart';
+import '../models/sales_item/sales_item_model.dart';
+import '../models/user_model/user_model.dart';
 
+class HiveService {
+  // register all adapters here
+  static Future<void> registerAdapters() async {
+    Hive.registerAdapter(LocalProductAdapter());
+    Hive.registerAdapter(ItemCountModelAdapter());
+    Hive.registerAdapter(FinalCountModelAdapter());
+    Hive.registerAdapter(SalesModelAdapter());
+    Hive.registerAdapter(PurchasesModelAdapter());
+    Hive.registerAdapter(HiveObjectModelAdapter());
+    Hive.registerAdapter(HiveUserAdapter());
+  }
+
+  static Future<void> initFlutter([String? subDir]) async {
+    Hive.init(subDir);
+
+    await Hive.openBox<LocalProduct>(localProduct, path: subDir);
+    await Hive.openBox<ItemCountModel>(itemCount, path: subDir);
+    await Hive.openBox<FinalCountModel>(finalCount, path: subDir);
+    await Hive.openBox<SalesModel>(sales, path: subDir);
+    await Hive.openBox<PurchasesModel>(purchases, path: subDir);
+    await Hive.openBox<HiveObjectModel>(hiveObj, path: subDir);
+    await Hive.openBox<HiveUser>(userBox, path: subDir);
+  }
+}
 // NOTE: Hive Service of LocalProduct
 
 class HiveLocalProductService {
@@ -70,7 +97,6 @@ class HiveItemCountService {
   }
 }
 
-
 // NOTE: This is the same as the above class, but of finalCountModel
 
 class HiveFinalCountService {
@@ -103,7 +129,6 @@ class HiveFinalCountService {
   }
 }
 
-
 // NOTE: This is the same as the above class, but of HiveObjectModel
 
 class HiveObjectService {
@@ -133,5 +158,105 @@ class HiveObjectService {
 
   Future<void> deleteAllProducts() async {
     await _hiveObjBox.clear();
+  }
+}
+
+// NOTE: This is the same as the above class, but of HiveUser
+
+class HiveUserService {
+  HiveUserService._privateConstructor(this._hiveUserBox);
+  static final HiveUserService _instance =
+      HiveUserService._privateConstructor(HiveBoxes.getHiveUserBox());
+  factory HiveUserService() => _instance;
+
+  final Box<HiveUser> _hiveUserBox;
+
+  Future<HiveUser> getUser(String id) async {
+    return _hiveUserBox.values
+        .where((element) => element.uid == id)
+        .toList()
+        .first;
+  }
+
+  Future<void> addUser(HiveUser user) async {
+    await _hiveUserBox.add(user);
+  }
+
+  Future<void> updateUser(HiveUser user) async {
+    if (_hiveUserBox.containsKey(user.key)) {
+      await _hiveUserBox.put(user.key, user);
+    } else {
+      print('User not found in the box.');
+    }
+  }
+
+  Future<void> deleteUser(HiveUser user) async {
+    await _hiveUserBox.delete(user.key);
+  }
+
+  Future<void> deleteAllUsers() async {
+    await _hiveUserBox.clear();
+  }
+}
+
+// NOTE: This is the same as the above class, but of SalesModel
+
+class SalesModelService {
+  SalesModelService._privateConstructor(this._salesModelBox);
+  static final SalesModelService _instance =
+      SalesModelService._privateConstructor(HiveBoxes.getSalesBox());
+  factory SalesModelService() => _instance;
+
+  final Box<SalesModel> _salesModelBox;
+
+  Future<List<SalesModel>> getAllSales() async {
+    return _salesModelBox.values.toList();
+  }
+
+  Future<void> addSale(SalesModel sale) async {
+    await _salesModelBox.add(sale);
+  }
+
+  Future<void> updateSale(SalesModel sale) async {
+    await _salesModelBox.put(sale.key, sale);
+  }
+
+  Future<void> deleteSale(SalesModel sale) async {
+    await _salesModelBox.delete(sale.key);
+  }
+
+  Future<void> deleteAllSales() async {
+    await _salesModelBox.clear();
+  }
+}
+
+// NOTE: This is the same as the above class, but of PurchasesModel
+
+class PurchasesModelService {
+  PurchasesModelService._privateConstructor(this._purchasesModelBox);
+  static final PurchasesModelService _instance =
+      PurchasesModelService._privateConstructor(HiveBoxes.getPurchasesBox());
+  factory PurchasesModelService() => _instance;
+
+  final Box<PurchasesModel> _purchasesModelBox;
+
+  Future<List<PurchasesModel>> getAllPurchases() async {
+    return _purchasesModelBox.values.toList();
+  }
+
+  Future<void> addPurchase(PurchasesModel purchase) async {
+    await _purchasesModelBox.add(purchase);
+  }
+
+  Future<void> updatePurchase(PurchasesModel purchase) async {
+    await _purchasesModelBox.put(purchase.key, purchase);
+  }
+
+  Future<void> deletePurchase(PurchasesModel purchase) async {
+    await _purchasesModelBox.delete(purchase.key);
+  }
+
+  Future<void> deleteAllPurchases() async {
+    await _purchasesModelBox.clear();
   }
 }

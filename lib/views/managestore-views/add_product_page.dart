@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:smarsh/services/cloud/cloud_product.dart';
 
-import '../../main.dart';
+import '../../utils/shared_classes.dart';
 import '../shared_views_widgets.dart';
 
 // SECTION Add New Product Page
@@ -130,8 +130,7 @@ class AddNewProductPage extends StatelessWidget {
   void _onPressed(BuildContext context) {
     final form = formKey.currentState!;
     if (form.validate()) {
-
-      final String productCode = Shared.generateProductCode(10);
+      final String productCode = Processors.generateCode(10);
       final productName = productNameController.text.trim();
       final buyingPrice = double.parse(buyingPriceController.text.trim());
       final sellingPrice = double.parse(sellingPriceController.text.trim());

@@ -5,21 +5,29 @@ import 'auth_widgets.dart';
 
 //SECTION: Login Page
 /* -------------------------------------------------------------------------- */
-class SignInPage extends StatelessWidget {
+class SignInPage extends StatefulWidget {
   final Function onSignInPressed;
   final Function onForgotPasswordPressed;
   final Function onGoogleSignInPressed;
 
-  SignInPage({
+  const SignInPage({
     super.key,
     required this.onSignInPressed,
     required this.onForgotPasswordPressed,
     required this.onGoogleSignInPressed,
   });
 
+  @override
+  State<SignInPage> createState() => _SignInPageState();
+}
+
+class _SignInPageState extends State<SignInPage> {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
   final TextEditingController emailController = TextEditingController();
+
   final TextEditingController passwordController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
@@ -74,7 +82,7 @@ class SignInPage extends StatelessWidget {
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
-                        onPressed: () => onForgotPasswordPressed(),
+                        onPressed: () => widget.onForgotPasswordPressed(),
                         child: const Text('Forgot Password?'),
                       ),
                     ),
@@ -113,7 +121,7 @@ class SignInPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 15),
                     FilledButton.tonal(
-                      onPressed: () => onGoogleSignInPressed(),
+                      onPressed: () => widget.onGoogleSignInPressed(),
                       style: FilledButton.styleFrom(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
@@ -158,7 +166,7 @@ class SignInPage extends StatelessWidget {
       final String email = emailController.text.trim();
       final String password = passwordController.text.trim();
 
-      onSignInPressed(email, password);
+      widget.onSignInPressed(email, password);
     }
   }
 }

@@ -2,18 +2,15 @@ import 'package:flutter/material.dart';
 
 import 'auth_widgets.dart';
 
-
 // SECTION: Forgot Password Page
 /* -------------------------------------------------------------------------- */
 class ForgotPasswordPage extends StatelessWidget {
-  final TextEditingController emailController;
-  final GlobalKey<FormState> formKey;
+  final TextEditingController emailController = TextEditingController();
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   final Function? onSendResetLinkPressed;
 
-  const ForgotPasswordPage({
+  ForgotPasswordPage({
     super.key,
-    required this.emailController,
-    required this.formKey,
     required this.onSendResetLinkPressed,
   });
 
@@ -80,7 +77,11 @@ class ForgotPasswordPage extends StatelessWidget {
                       ),
                       const SizedBox(height: 20),
                       FilledButton(
-                        onPressed: () => onSendResetLinkPressed!(),
+                        onPressed: () {
+                          if (formKey.currentState!.validate()) {
+                            onSendResetLinkPressed!();
+                          }
+                        },
                         style: FilledButton.styleFrom(
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),

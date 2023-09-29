@@ -2,18 +2,20 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:smarsh/services/auth/email_n_password/auth_user.dart';
 
-import 'services/auth/email_n_password/auth_exceptions.dart';
-import 'services/auth/email_n_password/auth_service.dart';
-import 'services/auth/google/google_service.dart';
-import 'utils/snackbar.dart';
-import 'views/auth-views/auth_widgets.dart';
-import 'views/auth-views/forgot_password_page.dart';
-import 'views/auth-views/login_page.dart';
-import 'views/auth-views/sign_up_page.dart';
-import 'views/auth-views/verify_email_page.dart';
-import 'views/homepage-views/home_page.dart';
+import '../../constants/hive_constants.dart';
+import '../../services/auth/email_n_password/auth_exceptions.dart';
+import '../../services/auth/email_n_password/auth_service.dart';
+import '../../services/auth/google/google_service.dart';
+import '../../services/hive/models/user_model/user_model.dart';
+import '../../services/hive/service/hive_service.dart';
+import '../../utils/shared_classes.dart';
+import '../../utils/snackbar.dart';
+import 'forgot_password_page.dart';
+import 'login_page.dart';
+import 'sign_up_page.dart';
+import 'verify_email_page.dart';
+import '../homepage-views/home_page.dart';
 
 // SECTION: Landing Page
 /* -------------------------------------------------------------------------- */
@@ -27,7 +29,24 @@ class LandingPage extends StatefulWidget {
 class _LandingPageState extends State<LandingPage> {
   @override
   void initState() {
+    
     super.initState();
+  }
+
+  void add() async {
+    await HiveUserService().deleteAllUsers();
+    final String id = Processors.generateCode(20);
+
+    HiveUser hiveUser = HiveUser(
+      uid: id,
+      url: 'https://ianshaloom.github.io/assets/img/perfil.png',
+      name: 'Stranger',
+      email: 'info@smarsh.com',
+      isEmailVerified: false,
+      isGoogleSignIn: false,
+    );
+
+    await HiveUserService().addUser(hiveUser);
   }
 
   @override
@@ -93,6 +112,7 @@ class _LandingPageState extends State<LandingPage> {
                 Text('Loging In...'),
               ],
             ),
+              
           ),
         ),
       ),
@@ -109,11 +129,21 @@ class _LandingPageState extends State<LandingPage> {
       if (user == null) {
         return (4);
       } else if (!user.isEmailVerified) {
-        // Navigate to verify email page
         _toVerifyEmailPage();
+        return user;
       } else {
-        // Navigate to home page
+        HiveUser? userHive = GetMeFromHive.getHiveUser;
+
+        userHive!.email = user.email;
+        userHive.name = 'Stranger';
+        userHive.url = 'https://ianshaloom.github.io/assets/img/perfil.png';
+        userHive.isGoogleSignIn = false;
+        userHive.isEmailVerified = true;
+
+        await userHive.save();
+
         _toHomePage();
+        return user;
       }
     } on UserNotFoundAuthException {
       _error(6);
@@ -146,14 +176,20 @@ class _LandingPageState extends State<LandingPage> {
     );
 
     try {
-      await GoogleService.google().signInWithGoogle();
-      final user = AppService.firebase().currentUser;
+      final user = await GoogleService.google().signInWithGoogle();
 
-      if (user != null) {
-        _toHomePage();
+      HiveUser userHive = GetMeFromHive.getHiveUser!;
 
-        // TODO Implemment that user was signed in with google
-      }
+      userHive.email = user.email;
+      userHive.name = user.name;
+      userHive.url = user.url;
+      userHive.isGoogleSignIn = true;
+      userHive.isEmailVerified = true;
+
+      await userHive.save();
+      _popContext();
+      _toHomePage();
+      //return user;
     } on UserNotFoundAuthException {
       _error(6);
     } on GenericAuthException {
@@ -220,12 +256,14 @@ class _LandingPageState extends State<LandingPage> {
       context,
       MaterialPageRoute(
         builder: (context) => ForgotPasswordPage(
-          emailController: _emailControllerForgot,
-          formKey: _forgotFormKey,
           onSendResetLinkPressed: _reset,
         ),
       ),
     );
+  }
+
+  void _popContext() {
+    Navigator.of(context).pop();
   }
 
   void _toHomePage() {
@@ -251,18 +289,7 @@ class _LandingPageState extends State<LandingPage> {
 
 /* -------------------------- Forgot Password Page -------------------------- */
 
-  final _emailControllerForgot = TextEditingController();
-  final _forgotFormKey = GlobalKey<FormState>();
-
-  void _reset() async {
-    final form = _forgotFormKey.currentState!;
-
-    if (form.validate()) {
-      final String email = _emailControllerForgot.text.trim();
-
-      _sendPasswordResetLink(email);
-    }
-  }
+  void _reset() async {}
 
   // NOTE Send Password Reset Link
   Future _sendPasswordResetLink(String email) async {

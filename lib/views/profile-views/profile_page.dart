@@ -1,9 +1,10 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
+import 'package:smarsh/services/hive/models/user_model/user_model.dart';
 
-import '../../auth_pages.dart';
+import '../auth-views/landing_page.dart';
+import '../../constants/hive_constants.dart';
 import '../../services/auth/email_n_password/auth_service.dart';
+import '../../services/auth/google/google_service.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -13,17 +14,10 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  final user = GetMeFromHive.getHiveUser;
   @override
   Widget build(BuildContext context) {
-    final user = AppService.firebase().currentUser;
-
-    return StreamBuilder<Object>(
-      stream: AppService.firebase().authStateChanges,
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return const LandingPage();
-        } else {
-          return Scaffold(
+    return Scaffold(
             appBar: AppBar(
               title: const Text('Profile'),
               centerTitle: true,
@@ -48,7 +42,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   Container(
                     alignment: Alignment.center,
                     child: CircleAvatar(
-                      //backgroundImage: NetworkImage(user!.url, scale: 1),
+                      backgroundImage: NetworkImage(user!.url!, scale: 1),
                       radius: 50,
                     ),
                   ),
@@ -63,7 +57,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ),
                     title: const Text('Name'),
-                    //subtitle: Text(user.name),
+                    subtitle: Text(user!.name!),
                   ),
                   ListTile(
                     leading: const SizedBox(
@@ -75,7 +69,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ),
                     title: const Text('Email'),
-                    //subtitle: Text(user.email),
+                    subtitle: Text(user!.email!),
                   ),
                   ListTile(
                     leading: const SizedBox(
@@ -137,9 +131,6 @@ class _ProfilePageState extends State<ProfilePage> {
               );
             }),
           );
-        }
-      },
-    );
   }
 
   void _adminProfile(BuildContext cxt) {
@@ -252,15 +243,30 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _logOut() async {
-    //TODO - Implement Google Log Out
-    
-    //await GoogleService.google().logOut();
-    await AuthService.firebase().logOut();
+    // Update User Profile in Hive
+    HiveUser userHive = GetMeFromHive.getHiveUser!;
 
+    if (userHive.isGoogleSignIn) {
+      print('HEH !!!! =====================>>> GOOGLE sIGN OUT');
+      await GoogleService.google().logOut();
+      await AuthService.firebase().logOut();
+    } else {
+      print(userHive.isGoogleSignIn);
+      print('HEH !!!! =====================>>> OUT');
+      await AuthService.firebase().logOut();
+    }
+
+    userHive.email = 'info@smarsh.com';
+    userHive.name = 'Stranger';
+    userHive.url = 'https://ianshaloom.github.io/assets/img/perfil.png';
+    userHive.isGoogleSignIn = false;
+    userHive.isEmailVerified = false;
+
+    await userHive.save();
     final user = AppService.firebase().currentUser;
     user == null ? _toLandingPage() : debugPrint(user.email);
   }
-  
+
   void _toLandingPage() {
     Navigator.pushAndRemoveUntil(
       context,
@@ -270,4 +276,6 @@ class _ProfilePageState extends State<ProfilePage> {
       (route) => route.isFirst,
     );
   }
+
+
 }

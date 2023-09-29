@@ -3,9 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../../auth_pages.dart';
+import 'landing_page.dart';
+import '../../constants/hive_constants.dart';
 import '../../services/auth/email_n_password/auth_exceptions.dart';
 import '../../services/auth/email_n_password/auth_service.dart';
+import '../../services/hive/models/user_model/user_model.dart';
 import '../homepage-views/home_page.dart';
 import 'auth_widgets.dart';
 
@@ -189,6 +191,16 @@ class _CountdownTimerState extends State<CountdownTimer> {
     _isEmailVerified = AppService.firebase().currentUser!.isEmailVerified;
 
     if (_isEmailVerified) {
+      HiveUser? userHive = GetMeFromHive.getHiveUser;
+
+      userHive!.email = AppService.firebase().currentUser!.email;
+      userHive.name = 'Stranger';
+      userHive.url = 'https://ianshaloom.github.io/assets/img/perfil.png';
+      userHive.isGoogleSignIn = false;
+      userHive.isEmailVerified = _isEmailVerified;
+
+      await userHive.save();
+
       _toHomePage();
       _timer1.cancel();
       _timer2.cancel();
@@ -197,9 +209,9 @@ class _CountdownTimerState extends State<CountdownTimer> {
 
   Future sendEmailVerification() async {
     try {
-      final user = AppService.firebase().currentUser;
+      final user = AppService.firebase().currentUser!;
 
-      if (user != null && !user.isEmailVerified) {
+      if (!user.isEmailVerified) {
         await AuthService.firebase().sendEmailVerification();
       }
     } on GenericAuthException {

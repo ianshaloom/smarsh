@@ -53,7 +53,7 @@ class GoogleAuthProvida implements GoogleProvider {
       final user = currentUser;
 
       if (user != null) {
-        print('nOTIFY LISTENERS =====================>>> sIGN IN');
+        print('=====================>>> GOOGLE sIGN IN');
         print('Welcome : ${user.name}');
         print('Welcome : ${user.isEmailVerified}');
         //notifyListeners();
@@ -76,6 +76,7 @@ class GoogleAuthProvida implements GoogleProvider {
   Future<void> logOut() async {
     try {
       await googleSignIn.disconnect();
+      print('=====================>>> WOW GOOGLE SIGN OUT');
     } catch (_) {
       throw GenericAuthException();
     }
