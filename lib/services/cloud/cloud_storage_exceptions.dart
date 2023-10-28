@@ -3,13 +3,17 @@ class CloudStorageException implements Exception {
 }
 
 // C in CRUD
-class CouldNotCreateProductException extends CloudStorageException {}
+class CouldNotCreateException extends CloudStorageException {}
 
 // R in CRUD
-class CouldNotGetAllProductException extends CloudStorageException {}
+class CouldNotGetAllException extends CloudStorageException {}
 
 // U in CRUD
-class CouldNotUpdateProductException extends CloudStorageException {}
+class CouldNotUpdateException extends CloudStorageException {}
 
 // D in CRUD
-class CouldNotDeleteProductException extends CloudStorageException {}
+class CouldNotDeleteException extends CloudStorageException {}
+
+// GenericCloudException
+
+class GenericCloudException extends CloudStorageException {}

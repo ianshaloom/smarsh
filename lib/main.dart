@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
-import 'package:smarsh/services/hive/service/hive_service.dart';
+import 'package:provider/provider.dart';
 
-import 'views/auth-views/landing_page.dart';
-import 'services/auth/email_n_password/auth_service.dart';
-import 'views/homepage-views/home_page.dart';
+import 'features/2-authentification/services/auth_user.dart';
+import 'global/providers/smarsh_providers.dart';
+import 'features/1-splash-onboard-landing/views/landing_page.dart';
+import 'features/2-authentification/services/auth_service.dart';
+import 'features/2-authentification/views/verify_email_page.dart';
+import 'features/4-home-page/view/home_page.dart';
+import 'services/hive/service/hive_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,21 +23,27 @@ void main() async {
   await AppService.firebase().initialize();
 
   final appDocumentDir = await path_provider.getApplicationDocumentsDirectory();
-  print(appDocumentDir.path);
   await HiveService.registerAdapters();
   await HiveService.initFlutter(appDocumentDir.path);
 
   runApp(
-    MaterialApp(
-      title: 'Smarsh',
-      theme: ThemeData(
-        brightness: Brightness.dark,
-        fontFamily: 'Montserrat',
-        colorSchemeSeed: Colors.green,
-        useMaterial3: true,
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider<AppProviders>(
+          create: (context) => AppProviders(),
+        ),
+      ],
+      child: MaterialApp(
+        title: 'Smarsh',
+        theme: ThemeData(
+          // brightness: Brightness.dark,
+          fontFamily: 'Montserrat',
+          colorSchemeSeed: Colors.green,
+          useMaterial3: true,
+        ),
+        debugShowCheckedModeBanner: false,
+        home: const SmarshApp(),
       ),
-      debugShowCheckedModeBanner: false,
-      home: const SmarshApp(),
     ),
   );
 }
@@ -46,20 +56,31 @@ class SmarshApp extends StatelessWidget {
     return StreamBuilder(
       stream: AppService.firebase().authStateChanges,
       builder: (context, snapshot) {
-        print('Stream is listening');
+        if (snapshot.connectionState == ConnectionState.active) {
+          final user = snapshot.data;
 
-        if (snapshot.hasData) {
-          // if (snapshot.data!.isEmailVerified == false) {
-          //   AuthService.firebase().sendEmailVerification();
-          //   return const VerifyEmailPage();
-          // }
-
-          print(snapshot.data!.email);
-          return const HomePage();
+          if (user != AuthUser.empty) {
+            if (user!.isEmailVerified) {
+              return const HomePage();
+            } else {
+              return const VerifyEmailPage();
+            }
+          } else {
+            return const LandingPage();
+          }
         } else {
-          return const LandingPage();
+          return const Scaffold(
+            body: Center(
+              child: SizedBox(
+                height: 75,
+                width: 75,
+                child: CircularProgressIndicator(),
+              ),
+            ),
+          );
         }
       },
     );
   }
 }
+// 0

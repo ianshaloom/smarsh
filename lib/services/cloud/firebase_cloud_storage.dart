@@ -20,22 +20,11 @@ class FirebaseCloudStorage {
       'buyingPrice': buyingPrice,
       'sellingPrice': sellingPrice,
       'stockCount': stockCount,
+      'count': [],
     };
 
     try {
-      stock.doc(customDocumentId).set(document).then((value) {
-        print("Product Added");
-      }).catchError((error) {
-        print("Failed to add product: $error");
-      });
-
-      //  final document = await stock.add({
-      //     'documentId': documentId,
-      //     'productName': productName,
-      //     'buyingPrice': buyingPrice,
-      //     'sellingPrice': sellingPrice,
-      //     'stockCount': stockCount,
-      //   });
+      stock.doc(customDocumentId).set(document);
 
       final fetchedProduct = await stock.doc(customDocumentId).get();
 
@@ -45,9 +34,10 @@ class FirebaseCloudStorage {
         buyingPrice: fetchedProduct['buyingPrice'],
         sellingPrice: fetchedProduct['sellingPrice'],
         stockCount: fetchedProduct['stockCount'],
+        count: fetchedProduct['count'],
       );
     } catch (e) {
-      throw CouldNotCreateProductException();
+      throw CouldNotCreateException();
     }
   }
 
@@ -74,9 +64,34 @@ class FirebaseCloudStorage {
         buyingPrice: fetchedProduct['buyingPrice'],
         sellingPrice: fetchedProduct['sellingPrice'],
         stockCount: fetchedProduct['stockCount'],
+        count: fetchedProduct['count'],
       );
     } catch (e) {
-      throw CouldNotUpdateProductException();
+      throw CouldNotUpdateException();
+    }
+  }
+
+  // Update counted product
+  Future<CloudProduct> updateCountedProduct({
+    required String documentId,
+    required List<dynamic>? count,
+  }) async {
+    try {
+      await stock.doc(documentId).update({
+        'count': count,
+      });
+
+      final fetchedProduct = await stock.doc(documentId).get();
+      return CloudProduct(
+        documentId: fetchedProduct.id,
+        productName: fetchedProduct['productName'],
+        buyingPrice: fetchedProduct['buyingPrice'],
+        sellingPrice: fetchedProduct['sellingPrice'],
+        stockCount: fetchedProduct['stockCount'],
+        count: fetchedProduct['count'],
+      );
+    } catch (e) {
+      throw CouldNotUpdateException();
     }
   }
 
@@ -85,25 +100,85 @@ class FirebaseCloudStorage {
     try {
       await stock.doc(documentId).delete();
     } catch (e) {
-      throw CouldNotDeleteProductException();
+      throw CouldNotDeleteException();
+    }
+  }
+
+// clear all products collection
+  Future<void> clearAllProducts() async {
+    try {
+      await stock.get().then((value) async {
+        for (var element in value.docs) {
+          await stock.doc(element.id).delete();
+        }
+      });
+    } catch (e) {
+      throw CouldNotDeleteException();
     }
   }
 
   // get all products
   Stream<List<CloudProduct>> allProducts() {
     final allProducts = stock.snapshots().map((event) => event.docs
-        .map((doc) => CloudProduct.fromSnapshot(documentSnapshot: doc))
+        .map((doc) => CloudProduct.fromDocSnapshot(documentSnapshot: doc))
         .toList());
     return allProducts;
+  }
+
+// stream a single cloudproduct
+  Stream singleProductStream({required String documentId}) {
+    return stock
+        .doc(documentId)
+        .snapshots()
+        .map((event) => CloudProduct.fromDocSnapshot(documentSnapshot: event));
   }
 
   Future<List<CloudProduct>> getAllStock() async {
     final snapShot = await stock.get();
     final fetchedProducts = snapShot.docs
-        .map((doc) => CloudProduct.fromSnapshot(documentSnapshot: doc))
+        .map((doc) => CloudProduct.fromDocSnapshot(documentSnapshot: doc))
         .toList();
 
     return fetchedProducts;
+  }
+
+  // check if collection is empty
+  Future<bool> isCollectionEmpty() async {
+    try {
+      final snapShot = await stock.get();
+      final fetchedProducts = snapShot.docs
+          .map((doc) => CloudProduct.fromDocSnapshot(documentSnapshot: doc))
+          .toList();
+
+      if (fetchedProducts.isEmpty) {
+        return true;
+      } else {
+        return false;
+      }
+    } on Exception catch (_) {
+      throw GenericCloudException();
+    }
+  }
+
+  // reset Cloudproduct count by setting count to empty list
+  Future resetCount(
+      {required String documentId}
+  ) async {
+    try {
+      final fetchedProduct = await stock.doc(documentId).get();
+      final CloudProduct e = CloudProduct.fromDocSnapshot(documentSnapshot: fetchedProduct);
+
+        if (e.count.isEmpty) {
+          // got to next element
+        } else {
+          await stock.doc(e.documentId).update({
+            'count': [],
+          });
+        }
+      
+    } catch (e) {
+      throw CouldNotUpdateException();
+    }
   }
 
   FirebaseCloudStorage._sharedInstance();
@@ -112,42 +187,130 @@ class FirebaseCloudStorage {
   factory FirebaseCloudStorage() => _shared;
 }
 
-  // Future<void> deleteProduct({required String documentId}) async {
-  //   try {
-  //     await stock.doc(documentId).delete();
-  //   } catch (e) {
-  //     throw CouldNotDeleteNoteException();
-  //   }
-  // }
+// Same as above, but for CloudUsers
 
-  // Future<void> updateProduct({
-  //   required String documentId,
-  //   required String text,
-  // }) async {
-  //   try {
-  //     await stock.doc(documentId).update({textFieldName: text});
-  //   } catch (e) {
-  //     throw CouldNotUpdateNoteException();
-  //   }
-  // }
+class FirebaseCloudUsers {
+  final users = FirebaseFirestore.instance.collection('users');
 
-  // Stream<Iterable<CloudProduct>> allProducts({required String ownerUserId}) {
-  //   final allNotes = stock
-  //       .where(ownerUserIdFieldName, isEqualTo: ownerUserId)
-  //       .snapshots()
-  //       .map((event) => event.docs.map((doc) => CloudProduct.fromSnapshot(doc)));
-  //   return allNotes;
-  // }
+  Future<CloudUser> createUser({
+    required String userId,
+    required String username,
+    required String email,
+    required String role,
+    required String url,
+  }) async {
+    String customDocumentId = userId;
+    final document = {
+      'userId': customDocumentId,
+      'username': username,
+      'email': email,
+      'role': role,
+      'url': url,
+    };
 
-  // Future<CloudProduct> addProduct({required String documentId}) async {
-  //   final document = await product.add({
-  //     ownerUserIdFieldName: ownerUserId,
-  //     textFieldName: '',
-  //   });
-  //   final fetchedNote = await document.get();
-  //   return CloudProduct(
-  //     documentId: fetchedNote.id,
-  //     ownerUserId: ownerUserId,
-  //     text: '',
-  //   );
-  // }
+    try {
+      users.doc(customDocumentId).set(document);
+      final fetchedUser = await users.doc(customDocumentId).get();
+
+      return CloudUser(
+        userId: fetchedUser.id,
+        username: fetchedUser['username'],
+        email: fetchedUser['email'],
+        role: fetchedUser['role'],
+        url: fetchedUser['url'],
+      );
+    } catch (e) {
+      throw CouldNotCreateException();
+    }
+  }
+
+  // update user
+  Future<CloudUser> updateUser({
+    required String userId,
+    required String username,
+    required String email,
+    required String role,
+    required String url,
+  }) async {
+    try {
+      await users.doc(userId).update({
+        'username': username,
+        'email': email,
+        'role': role,
+        'url': url,
+      });
+
+      final fetchedUser = await users.doc(userId).get();
+      return CloudUser(
+        userId: fetchedUser.id,
+        username: fetchedUser['username'],
+        email: fetchedUser['email'],
+        role: fetchedUser['role'],
+        url: fetchedUser['url'],
+      );
+    } catch (e) {
+      throw CouldNotUpdateException();
+    }
+  }
+
+  // delete user
+  Future<void> deleteUser({required String documentId}) async {
+    try {
+      await users.doc(documentId).delete();
+    } catch (e) {
+      throw CouldNotDeleteException();
+    }
+  }
+
+  // get all users
+  Stream<List<CloudUser>> allUsers() {
+    final allUsers = users.snapshots().map((event) => event.docs
+        .map((doc) => CloudUser.fromQuerySnapshot(documentSnapshot: doc))
+        .toList());
+    return allUsers;
+  }
+
+  Future<List<CloudUser>> getAllUsers() async {
+    final snapShot = await users.get();
+    final fetchedUsers = snapShot.docs
+        .map((doc) => CloudUser.fromQuerySnapshot(documentSnapshot: doc))
+        .toList();
+
+    return fetchedUsers;
+  }
+
+  // get a future of a single user by id fromdocsnapshot
+  Future<CloudUser?> singleUser({required String documentId}) async {
+    try {
+      final fetchedUser = await users.doc(documentId).get();
+
+      if (fetchedUser.exists) {
+        return CloudUser(
+          userId: fetchedUser.id,
+          username: fetchedUser['username'],
+          email: fetchedUser['email'],
+          role: fetchedUser['role'],
+          url: fetchedUser['url'],
+        );
+      } else {
+        return null;
+      }
+    } catch (e) {
+      throw GenericCloudException();
+    }
+  }
+
+  // stream a single user by id
+  Stream singleUserStream({required String documentId}) {
+    return users
+        .doc(documentId)
+        .snapshots()
+        .map((event) => CloudUser.fromDocSnapshot(documentSnapshot: event));
+  }
+
+  FirebaseCloudUsers._sharedInstance();
+
+  static final FirebaseCloudUsers _shared =
+      FirebaseCloudUsers._sharedInstance();
+  factory FirebaseCloudUsers() => _shared;
+}

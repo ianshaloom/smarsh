@@ -3,7 +3,7 @@ import 'package:hive/hive.dart';
 import '../../../constants/hive_constants.dart';
 import '../models/final_count/final_count_model.dart';
 import '../models/hive_object/hive_object_model.dart';
-import '../models/item_count/item_count_model.dart';
+import '../models/item_count/filter_model.dart';
 import '../models/local_product/local_product_model.dart';
 import '../models/purchases_item/purchases_item_model.dart';
 import '../models/sales_item/sales_item_model.dart';
@@ -13,7 +13,7 @@ class HiveService {
   // register all adapters here
   static Future<void> registerAdapters() async {
     Hive.registerAdapter(LocalProductAdapter());
-    Hive.registerAdapter(ItemCountModelAdapter());
+    Hive.registerAdapter(FilterModelAdapter());
     Hive.registerAdapter(FinalCountModelAdapter());
     Hive.registerAdapter(SalesModelAdapter());
     Hive.registerAdapter(PurchasesModelAdapter());
@@ -25,12 +25,16 @@ class HiveService {
     Hive.init(subDir);
 
     await Hive.openBox<LocalProduct>(localProduct, path: subDir);
-    await Hive.openBox<ItemCountModel>(itemCount, path: subDir);
-    await Hive.openBox<FinalCountModel>(finalCount, path: subDir);
+    await Hive.openBox<LocalProduct>(tempProduct, path: subDir);
     await Hive.openBox<SalesModel>(sales, path: subDir);
     await Hive.openBox<PurchasesModel>(purchases, path: subDir);
     await Hive.openBox<HiveObjectModel>(hiveObj, path: subDir);
     await Hive.openBox<HiveUser>(userBox, path: subDir);
+
+    // final stock count
+    await Hive.openBox<FinalCountModel>(finalCount, path: subDir);
+    // filters non posted
+    await Hive.openBox<FilterModel>(filter, path: subDir);
   }
 }
 // NOTE: Hive Service of LocalProduct
@@ -65,37 +69,38 @@ class HiveLocalProductService {
   }
 }
 
-// NOTE: This is the same as the above class, but of ItemCountModel
+// NOTE: Hive Service of LocalProduct
 
-class HiveItemCountService {
-  HiveItemCountService._privateConstructor(this._itemCountBox);
-  static final HiveItemCountService _instance =
-      HiveItemCountService._privateConstructor(HiveBoxes.getItemCountBox());
-  factory HiveItemCountService() => _instance;
+class TempProductService {
+  TempProductService._privateConstructor(this._productBox);
+  static final TempProductService _instance =
+      TempProductService._privateConstructor(HiveBoxes.getTempProductBox);
+  factory TempProductService() => _instance;
 
-  final Box<ItemCountModel> _itemCountBox;
-  //HiveItemCountService(this._itemCountBox);
+  final Box<LocalProduct> _productBox;
+  //HiveLocalProductService(this._productBox);
 
-  Future<List<ItemCountModel>> getAllProducts() async {
-    return _itemCountBox.values.toList();
+  Future<List<LocalProduct>> getAllProducts() async {
+    return _productBox.values.toList();
   }
 
-  Future<void> addProduct(ItemCountModel product) async {
-    await _itemCountBox.add(product);
+  Future<void> addProduct(LocalProduct product) async {
+    await _productBox.add(product);
   }
 
-  Future<void> updateProduct(ItemCountModel product) async {
-    await _itemCountBox.put(product.key, product);
+  Future<void> updateProduct(LocalProduct product) async {
+    await _productBox.put(product.key, product);
   }
 
-  Future<void> deleteProduct(ItemCountModel product) async {
-    await _itemCountBox.delete(product.key);
+  Future<void> deleteProduct(LocalProduct product) async {
+    await _productBox.delete(product.key);
   }
 
   Future<void> deleteAllProducts() async {
-    await _itemCountBox.clear();
+    await _productBox.clear();
   }
 }
+
 
 // NOTE: This is the same as the above class, but of finalCountModel
 
@@ -140,23 +145,41 @@ class HiveObjectService {
   final Box<HiveObjectModel> _hiveObjBox;
   //HiveObjectService(this._hiveObjBox);
 
-  Future<List<HiveObjectModel>> getAllProducts() async {
+  Future<List<HiveObjectModel>> getAllObject() async {
     return _hiveObjBox.values.toList();
   }
 
-  Future<void> addProduct(HiveObjectModel product) async {
-    await _hiveObjBox.add(product);
+  // check if the object exists using hive object description
+  Future<bool> checkIfObjectExists(String description) async {
+    final allObjects = await getAllObject();
+
+    if (_hiveObjBox.isEmpty) {
+      return false;
+    } else {
+      final filteredObjects = allObjects
+          .where((element) => element.description == description)
+          .toList();
+      if (filteredObjects.isEmpty) {
+        return false;
+      } else {
+        return true;
+      }
+    }
   }
 
-  Future<void> updateProduct(HiveObjectModel product) async {
-    await _hiveObjBox.put(product.key, product);
+  Future<void> addObject(HiveObjectModel obj) async {
+    await _hiveObjBox.add(obj);
   }
 
-  Future<void> deleteProduct(HiveObjectModel product) async {
-    await _hiveObjBox.delete(product.key);
+  Future<void> updateObject(HiveObjectModel obj) async {
+    await _hiveObjBox.put(obj.key, obj);
   }
 
-  Future<void> deleteAllProducts() async {
+  Future<void> deleteObject(HiveObjectModel obj) async {
+    await _hiveObjBox.delete(obj.key);
+  }
+
+  Future<void> deleteAllObject() async {
     await _hiveObjBox.clear();
   }
 }
@@ -185,9 +208,7 @@ class HiveUserService {
   Future<void> updateUser(HiveUser user) async {
     if (_hiveUserBox.containsKey(user.key)) {
       await _hiveUserBox.put(user.key, user);
-    } else {
-      print('User not found in the box.');
-    }
+    } else {}
   }
 
   Future<void> deleteUser(HiveUser user) async {
