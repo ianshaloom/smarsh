@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:provider/provider.dart';
 
+import 'features/1-splash-onboard-landing/services/onboard_service.dart';
+import 'features/1-splash-onboard-landing/views/onboard_page.dart';
 import 'features/2-authentification/services/auth_user.dart';
 import 'global/providers/smarsh_providers.dart';
 import 'features/1-splash-onboard-landing/views/landing_page.dart';
@@ -26,8 +28,16 @@ void main() async {
   await HiveService.registerAdapters();
   await HiveService.initFlutter(appDocumentDir.path);
 
-  runApp(
-    MultiProvider(
+  runApp(SmarshApp(showhome: await OnboardService.getShowHome));
+}
+
+class SmarshApp extends StatelessWidget {
+  final bool showhome;
+  const SmarshApp({super.key, required this.showhome});
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiProvider(
       providers: [
         ChangeNotifierProvider<AppProviders>(
           create: (context) => AppProviders(),
@@ -42,45 +52,67 @@ void main() async {
           useMaterial3: true,
         ),
         debugShowCheckedModeBanner: false,
-        home: const SmarshApp(),
+        home: showhome
+            ? StreamBuilder(
+                stream: AppService.firebase().authStateChanges,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.active) {
+                    final user = snapshot.data;
+
+                    if (user != AuthUser.empty) {
+                      if (user!.isEmailVerified) {
+                        return const HomePage();
+                      } else {
+                        return const VerifyEmailPage();
+                      }
+                    } else {
+                      return const LandingPage();
+                    }
+                  } else {
+                    return const Scaffold(
+                      body: Center(
+                        child: SizedBox(
+                          height: 75,
+                          width: 75,
+                          child: CircularProgressIndicator(),
+                        ),
+                      ),
+                    );
+                  }
+                },
+              )
+            : const OnBoardPage(),
       ),
-    ),
-  );
-}
-
-class SmarshApp extends StatelessWidget {
-  const SmarshApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder(
-      stream: AppService.firebase().authStateChanges,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.active) {
-          final user = snapshot.data;
-
-          if (user != AuthUser.empty) {
-            if (user!.isEmailVerified) {
-              return const HomePage();
-            } else {
-              return const VerifyEmailPage();
-            }
-          } else {
-            return const LandingPage();
-          }
-        } else {
-          return const Scaffold(
-            body: Center(
-              child: SizedBox(
-                height: 75,
-                width: 75,
-                child: CircularProgressIndicator(),
-              ),
-            ),
-          );
-        }
-      },
     );
   }
 }
 // 0
+
+// StreamBuilder(
+//       stream: AppService.firebase().authStateChanges,
+//       builder: (context, snapshot) {
+//         if (snapshot.connectionState == ConnectionState.active) {
+//           final user = snapshot.data;
+
+//           if (user != AuthUser.empty) {
+//             if (user!.isEmailVerified) {
+//               return const HomePage();
+//             } else {
+//               return const VerifyEmailPage();
+//             }
+//           } else {
+//             return const LandingPage();
+//           }
+//         } else {
+//           return const Scaffold(
+//             body: Center(
+//               child: SizedBox(
+//                 height: 75,
+//                 width: 75,
+//                 child: CircularProgressIndicator(),
+//               ),
+//             ),
+//           );
+//         }
+//       },
+//     )
