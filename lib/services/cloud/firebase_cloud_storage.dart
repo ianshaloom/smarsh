@@ -71,8 +71,22 @@ class FirebaseCloudStorage {
     }
   }
 
+  // update product stock count
+  Future<void> updateProductStockCount({
+    required String documentId,
+    required int stockCount,
+  }) async {
+    try {
+      await stock.doc(documentId).update({
+        'stockCount': stockCount,
+      });
+    } catch (e) {
+      throw CouldNotUpdateException();
+    }
+  }
+
   // Update counted product
-  Future<CloudProduct> updateCountedProduct({
+  Future<void> updateCountListProduct({
     required String documentId,
     required List<dynamic>? count,
   }) async {
@@ -80,16 +94,6 @@ class FirebaseCloudStorage {
       await stock.doc(documentId).update({
         'count': count,
       });
-
-      final fetchedProduct = await stock.doc(documentId).get();
-      return CloudProduct(
-        documentId: fetchedProduct.id,
-        productName: fetchedProduct['productName'],
-        buyingPrice: fetchedProduct['buyingPrice'],
-        sellingPrice: fetchedProduct['sellingPrice'],
-        stockCount: fetchedProduct['stockCount'],
-        count: fetchedProduct['count'],
-      );
     } catch (e) {
       throw CouldNotUpdateException();
     }
@@ -161,21 +165,19 @@ class FirebaseCloudStorage {
   }
 
   // reset Cloudproduct count by setting count to empty list
-  Future resetCount(
-      {required String documentId}
-  ) async {
+  Future resetCount({required String documentId}) async {
     try {
       final fetchedProduct = await stock.doc(documentId).get();
-      final CloudProduct e = CloudProduct.fromDocSnapshot(documentSnapshot: fetchedProduct);
+      final CloudProduct e =
+          CloudProduct.fromDocSnapshot(documentSnapshot: fetchedProduct);
 
-        if (e.count.isEmpty) {
-          // got to next element
-        } else {
-          await stock.doc(e.documentId).update({
-            'count': [],
-          });
-        }
-      
+      if (e.count.isEmpty) {
+        // got to next element
+      } else {
+        await stock.doc(e.documentId).update({
+          'count': [],
+        });
+      }
     } catch (e) {
       throw CouldNotUpdateException();
     }
@@ -198,6 +200,7 @@ class FirebaseCloudUsers {
     required String email,
     required String role,
     required String url,
+    required String provider,
   }) async {
     String customDocumentId = userId;
     final document = {
@@ -218,6 +221,7 @@ class FirebaseCloudUsers {
         email: fetchedUser['email'],
         role: fetchedUser['role'],
         url: fetchedUser['url'],
+        signInProvider: fetchedUser['provider'],
       );
     } catch (e) {
       throw CouldNotCreateException();
@@ -231,6 +235,7 @@ class FirebaseCloudUsers {
     required String email,
     required String role,
     required String url,
+    required String provider,
   }) async {
     try {
       await users.doc(userId).update({
@@ -238,6 +243,7 @@ class FirebaseCloudUsers {
         'email': email,
         'role': role,
         'url': url,
+        'provider': provider,
       });
 
       final fetchedUser = await users.doc(userId).get();
@@ -247,6 +253,7 @@ class FirebaseCloudUsers {
         email: fetchedUser['email'],
         role: fetchedUser['role'],
         url: fetchedUser['url'],
+        signInProvider: fetchedUser['provider'],
       );
     } catch (e) {
       throw CouldNotUpdateException();
@@ -291,6 +298,7 @@ class FirebaseCloudUsers {
           email: fetchedUser['email'],
           role: fetchedUser['role'],
           url: fetchedUser['url'],
+          signInProvider: fetchedUser['provider'],
         );
       } else {
         return null;

@@ -1,18 +1,19 @@
-import '../../../../constants/hive_constants.dart';
-import '../../../../services/hive/models/final_count/final_count_model.dart';
-import '../../../../services/hive/models/local_product/local_product_model.dart';
-import '../entities/non_post_item.dart';
+import '../../../../services/hive/models/final_count_model/final_count_model.dart';
+import '../../../../services/hive/models/local_product_model/local_product_model.dart';
+import '../../../../services/hive/models/processed_stock_model/processed_stock.dart';
+import '../../../../services/hive/service/hive_constants.dart';
+import '../entities/cloud_nonposted.dart';
 
 class NonPosted {
   NonPosted._();
   static final NonPosted _instance = NonPosted._();
   factory NonPosted() => _instance;
 
-  List<Item> get nonPostedItemsList => nonpostedItems();
+  List<CloudNonPost> get nonPostedItemsList => nonpostedItems();
 
   // Filter Getters
-  List<Item> get missingItems {
-    List<Item> missing = [];
+  List<CloudNonPost> get missingItems {
+    List<CloudNonPost> missing = [];
     for (var e in nonpostedItems()) {
       if (e.nonPosted < 0) {
         missing.add(e);
@@ -21,8 +22,8 @@ class NonPosted {
     return missing;
   }
 
-  List<Item> get intactItems {
-    List<Item> intact = [];
+  List<CloudNonPost> get intactItems {
+    List<CloudNonPost> intact = [];
     for (var e in nonpostedItems()) {
       if (e.nonPosted == 0) {
         intact.add(e);
@@ -31,8 +32,8 @@ class NonPosted {
     return intact;
   }
 
-  List<Item> get excessItems {
-    List<Item> excess = [];
+  List<CloudNonPost> get excessItems {
+    List<CloudNonPost> excess = [];
     for (var e in nonpostedItems()) {
       if (e.nonPosted > 0) {
         excess.add(e);
@@ -42,7 +43,7 @@ class NonPosted {
   }
 
 // return total non posted items
-  double totalNonPosted(List<Item> nonPost) {
+  double totalNonPosted(List<CloudNonPost> nonPost) {
     double total = 0;
     List<LocalProduct> stock = GetMeFromHive.getAllLocalProducts;
     for (var e in nonPost) {
@@ -58,9 +59,14 @@ class NonPosted {
 
   // return a list of items with expected stock count
   // last stock - sales + purchases
-  List<Item> nonpostedItems() {
+  List<CloudNonPost> nonpostedItems() {
     List<LocalProduct> stock = GetMeFromHive.getAllLocalProducts;
-    List<Item> nonPostItems = [];
+    stock.sort((a, b) => a.productName.compareTo(b.productName));
+    List<CloudNonPost> nonPostItems = [];
+
+    if (stock.isEmpty) {
+      return nonPostItems;
+    }
 
     for (var e in stock) {
       // item id
@@ -73,11 +79,12 @@ class NonPosted {
       final int recentCount = finalCountModel(e.documentId);
 
       //item
-      Item i = Item(
-        id,
-        name,
-        expectedCount,
-        recentCount,
+      CloudNonPost i = CloudNonPost(
+        id: id,
+        name: name,
+        expectedCount: expectedCount,
+        recentCount: recentCount,
+        sellingsPrice: e.sellingPrice,
       );
 
       nonPostItems.add(i);
@@ -88,11 +95,22 @@ class NonPosted {
 
   int expectedStock(LocalProduct e) {
     int expectedCount = 0;
-    List<LocalProduct> temp = GetMeFromHive.getAllTempProducts;
-    final LocalProduct p =
-        temp.firstWhere((element) => element.documentId == e.documentId);
-    expectedCount = p.stockCount;
+    List<ProcessedData> temp = GetMeFromHive.getAllProcessedData;
+    temp.sort((a, b) => a.productName.compareTo(b.productName));
 
+    if (temp.isEmpty) {
+      expectedCount = 403;
+      return expectedCount;
+    }
+
+    final ProcessedData p =
+        temp.firstWhere((element) => element.documentId == e.documentId,
+            orElse: () => ProcessedData(
+                  documentId: e.documentId,
+                  productName: e.productName,
+                  stockCount: 404,
+                ));
+    expectedCount = p.stockCount;
     return expectedCount;
   }
 
@@ -100,9 +118,21 @@ class NonPosted {
   int finalCountModel(String id) {
     int recentCount = 0;
     List<FinalCountModel> finalCount = GetMeFromHive.getAllFinalCounts;
+    finalCount.sort((a, b) => a.productName.compareTo(b.productName));
+
+    if (finalCount.isEmpty) {
+      recentCount = 403;
+      return recentCount;
+    }
 
     final FinalCountModel f =
-        finalCount.firstWhere((element) => element.productId == id);
+        finalCount.firstWhere((element) => element.productId == id,
+            orElse: () => FinalCountModel(
+                  date: DateTime.now(),
+                  productName: '404',
+                  productId: id,
+                  count: 404,
+                ));
 
     recentCount = f.count;
 

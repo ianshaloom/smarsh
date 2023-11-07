@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../entities/non_post_item.dart';
+import '../entities/cloud_nonposted.dart';
 
 class NonpostTile extends StatelessWidget {
-  final Item nonPost;
+  final CloudNonPost nonPost;
   const NonpostTile({super.key, required this.nonPost});
 
   @override
@@ -78,16 +78,16 @@ class NonpostTile extends StatelessWidget {
                                   fontWeight: FontWeight.w400,
                                   fontSize: 12,
                                 ),
-                      ),
+                      ),*/
                       const SizedBox(height: 15),
                       Text(
-                        'Total Sales: ${nonPost.sales}',
+                        'Total: ${nonPost.totalNonPosted}',
                         style:
                             Theme.of(context).textTheme.titleMedium!.copyWith(
                                   fontWeight: FontWeight.w400,
                                   fontSize: 13,
                                 ),
-                      ),*/
+                      ),
                       const SizedBox(height: 15),
                       _buildButton(nonPost, context),
                     ],
@@ -103,7 +103,7 @@ class NonpostTile extends StatelessWidget {
     );
   }
 
-  Widget _buildButton(Item i, BuildContext context) {
+  Widget _buildButton(CloudNonPost i, BuildContext context) {
     final int total = i.recentCount - i.expectedCount;
     return Container(
       padding: const EdgeInsets.symmetric(

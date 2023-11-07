@@ -51,6 +51,7 @@ class CloudUser {
   final String email;
   final String role;
   final String url;
+  final String signInProvider;
 
   CloudUser({
     required this.userId,
@@ -58,6 +59,7 @@ class CloudUser {
     required this.email,
     required this.role,
     required this.url,
+    required this.signInProvider,
   });
 
   CloudUser.fromQuerySnapshot(
@@ -66,7 +68,9 @@ class CloudUser {
         username = documentSnapshot['username'],
         email = documentSnapshot['email'],
         role = documentSnapshot['role'],
-        url = documentSnapshot['url'];
+        url = documentSnapshot['url'],
+        signInProvider = documentSnapshot['provider']
+        ;
 
 
   CloudUser.fromDocSnapshot(
@@ -75,6 +79,6 @@ class CloudUser {
         username = documentSnapshot['username'],
         email = documentSnapshot['email'],
         role = documentSnapshot['role'],
-        url = documentSnapshot['url'];
+        url = documentSnapshot['url'],
+        signInProvider = documentSnapshot['provider'];
 }
-

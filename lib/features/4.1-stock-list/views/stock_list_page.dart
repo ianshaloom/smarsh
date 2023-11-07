@@ -1,7 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import '../../../services/hive/models/local_product/local_product_model.dart';
+import '../../../services/hive/models/local_product_model/local_product_model.dart';
+import '../../../services/hive/service/hive_constants.dart';
 import '../services/stock_list_mixin.dart';
 import '../widgets/item_details_bottomsheet.dart';
 import '../widgets/refresh_local_products_sl.dart';
@@ -19,7 +20,7 @@ class StockListPage extends StatefulWidget {
 
 class _StockListPageState extends State<StockListPage> with StockListMixin {
   final _searchController = TextEditingController();
-  List<LocalProduct> products = [];
+  final List<LocalProduct> products = GetMeFromHive.getAllLocalProducts;
   List _searched = [];
 
   void _searchProduct(String query) {
@@ -48,12 +49,7 @@ class _StockListPageState extends State<StockListPage> with StockListMixin {
 
   @override
   void initState() {
-    getProducts().then((value) {
-      setState(() {
-        products = value;
-        _searched = value;
-      });
-    });
+    _searched = products;
     super.initState();
   }
 
@@ -140,6 +136,7 @@ class _StockListPageState extends State<StockListPage> with StockListMixin {
         child: ListView.builder(
           itemCount: _searched.length,
           itemBuilder: (context, index) {
+            _searched.sort((a, b) => a.productName.compareTo(b.productName));
             return StockListTile(
               product: _searched[index],
               onTap: _drawProductDetailBottomSheet,

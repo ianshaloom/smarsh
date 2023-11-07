@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../entities/non_post_item.dart';
+import '../entities/cloud_nonposted.dart';
 import '../services/non_posted_mixin.dart';
 
 class NonPostedUploadProgress extends StatefulWidget {
-  final List<Item> locals;
+  final List<CloudNonPost> locals;
   const NonPostedUploadProgress({super.key, required this.locals});
 
   @override

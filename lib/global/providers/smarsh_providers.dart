@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:smarsh/features/2-authentification/services/auth_service.dart';
+import 'package:smarsh/features/2-Authentification/2-authentification/services/auth_service.dart';
 import 'package:smarsh/services/cloud/firebase_cloud_storage.dart';
 
 class AppProviders with ChangeNotifier {

@@ -34,6 +34,8 @@ class HomeMixin {
 
   final passController = TextEditingController();
   void switchToAdmin(BuildContext cxt) {
+    // Navigator.push(
+    //     cxt, MaterialPageRoute(builder: (context) => const AdminPanel()));
     showModalBottomSheet(
         context: cxt,
         shape: RoundedRectangleBorder(

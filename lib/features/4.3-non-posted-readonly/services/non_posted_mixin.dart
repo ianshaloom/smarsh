@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 // ignore: library_prefixes
 import 'package:to_csv/to_csv.dart' as exportCSV;
 
-import '../../../constants/hive_constants.dart';
+import '../../../services/hive/models/filter_model/filter_model.dart';
+import '../../../services/hive/models/local_product_model/local_product_model.dart';
+import '../../../services/hive/service/hive_constants.dart';
 import '../../../global/helpers/snacks.dart';
-import '../../../services/hive/models/item_count/filter_model.dart';
-import '../../../services/hive/models/local_product/local_product_model.dart';
 import '../entities/cloud_nonposted.dart';
 import 'filter_hive_service.dart';
 
@@ -13,24 +13,14 @@ mixin NonPostedMixin {
   final List<LocalProduct> stock = GetMeFromHive.getAllLocalProducts;
 
   double totalForAllItems(List<CloudNonPosted> non) {
+    non.sort((a, b) => a.name.compareTo(b.name));
+
     double total = 0;
     for (var e in non) {
-      for (var element in stock) {
-        if (element.documentId == e.id) {
-          double t = element.buyingPrice * e.nonPosted;
-          total += t;
-        }
-      }
+      double t = e.totalNonPosted;
+      total += t;
     }
     return total;
-  }
-
-  double totalForOneItem(CloudNonPosted non) {
-    final LocalProduct p =
-        stock.firstWhere((element) => element.documentId == non.id);
-    double t = p.buyingPrice * non.nonPosted;
-
-    return t;
   }
 
   int lastStockTake(String id) {
@@ -79,7 +69,7 @@ mixin NonPostedMixin {
       for (var e in nonPost) {
         data.add(e.name);
         data.add(e.nonPosted.toString());
-        data.add(totalForOneItem(e).toStringAsFixed(2));
+        data.add(e.totalNonPosted.toStringAsFixed(2));
         listOfLists.add(data);
         data = [];
       }

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
-import '../../../../constants/hive_constants.dart';
+import '../../../../services/hive/models/local_product_model/local_product_model.dart';
+import '../../../../services/hive/service/hive_constants.dart';
 import '../../../../services/cloud/cloud_product.dart';
 import '../../../../services/cloud/firebase_cloud_storage.dart';
-import '../../../../services/hive/models/local_product/local_product_model.dart';
 import '../services/import_product_mixin.dart';
 import '../widgets/upload_product_progress.dart';
 

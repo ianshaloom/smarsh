@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../../../services/hive/models/local_product/local_product_model.dart';
+import '../../../services/hive/models/local_product_model/local_product_model.dart';
+
 
 class ItemDetails extends StatelessWidget {
   final LocalProduct product;

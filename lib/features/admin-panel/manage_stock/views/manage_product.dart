@@ -6,6 +6,7 @@ import '../../../../global/helpers/snacks.dart';
 import '../../../../services/cloud/cloud_product.dart';
 import '../../../../services/cloud/cloud_storage_exceptions.dart';
 import '../../../../services/cloud/firebase_cloud_storage.dart';
+import '../services/manage_product_mixin.dart';
 import '../widgets/edit_item_dialog.dart';
 import '../widgets/manage_stock_tile.dart';
 
@@ -16,7 +17,8 @@ class ManageProductPage extends StatefulWidget {
   State<ManageProductPage> createState() => _ManageProductPageState();
 }
 
-class _ManageProductPageState extends State<ManageProductPage> {
+class _ManageProductPageState extends State<ManageProductPage>
+    with ManageProductMixin {
   Future<List<CloudProduct>> _cloudStock = FirebaseCloudStorage().getAllStock();
   late final FirebaseCloudStorage _cloudStorage;
 
@@ -49,7 +51,8 @@ class _ManageProductPageState extends State<ManageProductPage> {
             actions: [
               IconButton(
                 icon: const Icon(Icons.clear_all),
-                onPressed: () => prs.isEmpty ? null : _clearAllProducts(prs),
+                onPressed: () =>
+                    prs.isEmpty ? null : confirmClearDialog(context),
                 // onPressed: () => print(prs.first),
               ),
             ],
@@ -125,39 +128,6 @@ class _ManageProductPageState extends State<ManageProductPage> {
         ],
       ),
     );
-  }
-
-  // clear all products in cloud storage
-  void _clearAllProducts(List<CloudProduct> prs) async {
-    showDialog(
-      barrierColor: Colors.black38,
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => Center(
-        child: SizedBox(
-          height: 75,
-          width: 75,
-          child: CircularProgressIndicator(
-            color: Colors.white,
-            backgroundColor: Theme.of(context).colorScheme.primary,
-          ),
-        ),
-      ),
-    );
-
-    try {
-      for (var pr in prs) {
-        await _cloudStorage.deleteProduct(documentId: pr.documentId);
-      }
-
-      final bool isClear = await _cloudStorage.isCollectionEmpty();
-
-      if (isClear) {
-        Navigator.of(context).pop();
-      }
-    } on CouldNotDeleteException {
-      Snack().showSnackBar(context: context, message: 'Failed To Clear Stock');
-    }
   }
 
   void _onTap(BuildContext cxt, CloudProduct product) {
@@ -290,7 +260,6 @@ class _ManageProductPageState extends State<ManageProductPage> {
     }
   }
 }
-
 
 class ProductModel {
   String productId;

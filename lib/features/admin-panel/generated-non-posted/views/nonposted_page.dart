@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../entities/non_post_item.dart';
+import '../entities/cloud_nonposted.dart';
 import '../services/non_posted.dart';
 import '../services/non_posted_mixin.dart';
 import '../widgets/filter_bottom_sheet.dart';
 import '../widgets/nonpost_tile.dart';
 import '../widgets/refresh_local_products.dart';
-import '../widgets/upload_nonposted_progress.dart';
 
 class AdminNonPostedListPage extends StatefulWidget {
   const AdminNonPostedListPage({super.key});
@@ -19,7 +18,7 @@ class AdminNonPostedListPage extends StatefulWidget {
 class _AdminNonPostedListPageState extends State<AdminNonPostedListPage>
     with NonPostedMixin {
   final NonPosted n = NonPosted();
-  List<Item> nonPost = [];
+  List<CloudNonPost> nonPost = [];
 
   @override
   void initState() {
@@ -35,9 +34,11 @@ class _AdminNonPostedListPageState extends State<AdminNonPostedListPage>
         slivers: [
           SliverAppBar.medium(
             backgroundColor: Theme.of(context).colorScheme.surface,
-            title: const Text('Generated Non Posted'),
+            title: const Text('Non Posted',
+                style: TextStyle(fontWeight: FontWeight.w600)),
             // centerTitle: true,
             // elevation: 0,
+            scrolledUnderElevation: 0,
             leading: IconButton(
               icon: const Icon(Icons.arrow_back_ios),
               onPressed: () {
@@ -54,9 +55,13 @@ class _AdminNonPostedListPageState extends State<AdminNonPostedListPage>
               ),
               IconButton(
                 onPressed: () {
-                  uploadNonPosted(nonPost);
+                  uploadNonPosted(context, nonPost);
                 },
                 icon: const Icon(Icons.cloud_upload),
+              ),
+              IconButton(
+                onPressed: () => confirmClearNonposted(context),
+                icon: const Icon(Icons.clear_all),
               ),
             ],
           ),
@@ -126,13 +131,8 @@ class _AdminNonPostedListPageState extends State<AdminNonPostedListPage>
     });
   }
 
-  Future uploadNonPosted(List<Item> items) async {
-    await showDialog(
-      barrierColor: Colors.black38,
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => NonPostedUploadProgress(locals: items),
-    );
+  void uploadNonPosted(BuildContext cxt, List<CloudNonPost> items) {
+    confirmUploadNonposted(cxt, items);
   }
 
   Future filterBottomSheet(BuildContext cxt) async {

@@ -1,7 +1,7 @@
 import 'package:hive_flutter/hive_flutter.dart';
 
-import '../../../constants/hive_constants.dart';
-import '../../../services/hive/models/item_count/filter_model.dart';
+import '../../../services/hive/models/filter_model/filter_model.dart';
+import '../../../services/hive/service/hive_constants.dart';
 
 class FilterService {
   FilterService._privateConstructor(this._itemCountBox);

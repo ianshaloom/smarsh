@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../services/hive/models/local_product/local_product_model.dart';
+import '../../../../services/hive/models/local_product_model/local_product_model.dart';
 import '../services/import_product_mixin.dart';
 
 class ProductUploadProgress extends StatefulWidget {

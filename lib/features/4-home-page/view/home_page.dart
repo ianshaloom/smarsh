@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
+import 'package:smarsh/features/2-Authentification/constants.dart';
 
 import '../../../constants/svg_constants.dart';
 import '../../../global/providers/smarsh_providers.dart';
-import '../../2-authentification/services/auth_service.dart';
+import '../../2-Authentification/2-authentification/services/auth_service.dart';
 import '../../../services/cloud/cloud_product.dart';
 import '../../../services/cloud/firebase_cloud_storage.dart';
 import '../../profile-page/views/profile_page.dart';
 import '../service/home_mixin.dart';
+import '../service/home_service.dart';
 import '../widget/homepage_tile.dart';
 import '../../4.2-stock-take/views/stock_take_page.dart';
 
@@ -21,9 +23,18 @@ class HomePage extends StatelessWidget {
     final screenSize = MediaQuery.of(context).size;
     final String uid = AppService.firebase().currentUser!.id;
     context.read<AppProviders>().toggleAdmin();
+    _localData.getProducts(context);
+    final CloudUser cloudUser = CloudUser(
+        userId: 'userId',
+        username: 'Username',
+        email: 'info@nedak.com',
+        role: 'user',
+        url: authUserProfilePicture,
+        signInProvider: 'google');
 
     return Scaffold(
       body: StreamBuilder(
+        initialData: cloudUser,
         stream: FirebaseCloudUsers().singleUserStream(documentId: uid),
         builder: (context, snapshot) {
           //
@@ -249,6 +260,15 @@ class HomePage extends StatelessWidget {
         elevation: 2,
         //mini: true,
         onPressed: () => _home.navigateToStockList(context),
+        // onPressed: () async {
+        //   CloudProduct created = await FirebaseCloudStorage().createProduct(
+        //     documentId: 'C7L0JYO9R9',
+        //     productName: 'CARIBEAN GIN 250ML',
+        //     buyingPrice: 208,
+        //     sellingPrice: 255,
+        //     stockCount: 16,
+        //   );
+        // },
         child: const Icon(
           Icons.view_list_outlined,
           size: 35,
@@ -256,10 +276,7 @@ class HomePage extends StatelessWidget {
       ),
     );
   }
-
-  void onTap() {
-    print('tapped');
-  }
 }
 
 final HomeMixin _home = HomeMixin();
+final NonPostLocalDataSrcRd _localData = NonPostLocalDataSrcRd();

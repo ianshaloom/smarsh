@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class EditTextFormField extends StatefulWidget {
@@ -27,6 +26,7 @@ class _EditTextFormFieldState extends State<EditTextFormField> {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: widget.controller,
+      keyboardType: TextInputType.number,
       decoration: InputDecoration(
         labelText: widget.labelText,
       ),

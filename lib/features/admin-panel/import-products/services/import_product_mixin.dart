@@ -6,12 +6,12 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:smarsh/global/helpers/snacks.dart';
 
-import '../../../../constants/hive_constants.dart';
+import '../../../../services/hive/models/local_product_model/local_product_model.dart';
+import '../../../../services/hive/service/hive_constants.dart';
 import '../../../../global/utils/shared_classes.dart';
 import '../../../../services/cloud/cloud_product.dart';
 import '../../../../services/cloud/cloud_storage_exceptions.dart';
 import '../../../../services/cloud/firebase_cloud_storage.dart';
-import '../../../../services/hive/models/local_product/local_product_model.dart';
 import '../../../../services/hive/service/hive_service.dart';
 
 mixin ImportPrMixin {
@@ -40,7 +40,7 @@ mixin ImportPrMixin {
 
     try {
       // clear product box
-      await TempProductService().deleteAllProducts();
+      await HiveTempProduct().deleteAllProducts();
 
       // pick file from device
       final FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -77,7 +77,7 @@ mixin ImportPrMixin {
             stockCount: stockCount,
           );
 
-          await TempProductService().addProduct(localProduct);
+          await HiveTempProduct().addProduct(localProduct);
 
           if (i == listTwo.length - 1) {
             Navigator.of(context).pop();
@@ -104,12 +104,16 @@ mixin ImportPrMixin {
   }
 
   String getProductId(List<CloudProduct> pr, String productName) {
-    for (var element in pr) {
-      if (element.productName == productName) {
-        return element.documentId;
-      }
-    }
-    return Processors.generateCode(10);
+    final CloudProduct cp = pr.firstWhere(
+        (element) => element.productName.trim() == productName.trim(), orElse: () => CloudProduct(
+          documentId: Processors.generateCode(10),
+          productName: productName,
+          buyingPrice: 0,
+          sellingPrice: 0,
+          stockCount: 0,
+        ));
+
+     return cp.documentId;
   }
 
   // add products to cloud
@@ -170,24 +174,24 @@ mixin ImportPrMixin {
     );
   }
 
-  Stream<int> importingPr(BuildContext context) async* {
-    try {
-      List<LocalProduct> lproducts = GetMeFromHive.getAllTempProducts;
+  // Stream<int> importingPr(BuildContext context) async* {
+  //   try {
+  //     List<LocalProduct> lproducts = GetMeFromHive.getAllTempProducts;
 
-      for (var pr in lproducts) {
-        await FirebaseCloudStorage().createProduct(
-          documentId: pr.documentId,
-          productName: pr.productName,
-          buyingPrice: pr.buyingPrice,
-          sellingPrice: pr.sellingPrice,
-          stockCount: pr.stockCount,
-        );
+  //     for (var pr in lproducts) {
+  //       await FirebaseCloudStorage().createProduct(
+  //         documentId: pr.documentId,
+  //         productName: pr.productName,
+  //         buyingPrice: pr.buyingPrice,
+  //         sellingPrice: pr.sellingPrice,
+  //         stockCount: pr.stockCount,
+  //       );
 
-        yield ((lproducts.indexOf(pr) / lproducts.length) * 100).round();
-      }
-    } on CouldNotCreateException {
-      Snack()
-          .showSnackBar(context: context, message: 'Could not write to cloud');
-    }
-  }
+  //       yield ((lproducts.indexOf(pr) / lproducts.length) * 100).round();
+  //     }
+  //   } on CouldNotCreateException {
+  //     Snack()
+  //         .showSnackBar(context: context, message: 'Could not write to cloud');
+  //   }
+  // }
 }

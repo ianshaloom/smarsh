@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
-import '../services/onboard_service.dart';
+import '../../../services/hive/models/show_home_model/show_home.dart';
+import '../../../services/hive/service/hive_constants.dart';
 import '../widgets/page.three.dart';
 import '../widgets/page_one.dart';
 import '../widgets/page_two.dart';
-import 'landing_page.dart';
 
 class OnBoardPage extends StatefulWidget {
   const OnBoardPage({super.key});
@@ -65,14 +65,15 @@ class _OnBoardPageState extends State<OnBoardPage> {
               isLastIndex
                   ? FilledButton(
                       onPressed: () async {
-                        Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const LandingPage(),
-                            ),
-                            (route) => route.isFirst);
-                        OnboardService.toggleShowHome(true);
-                        // _controller.jumpToPage(0);
+                        await onboardDone();
+                        // Navigator.pushAndRemoveUntil(
+                        //     context,
+                        //     MaterialPageRoute(
+                        //       builder: (context) => const LandingPage(),
+                        //     ),
+                        //     (route) => route.isFirst);
+                        // OnboardService.toggleShowHome(true);
+                        // // _controller.jumpToPage(0);
                       },
                       style: FilledButton.styleFrom(
                         shape: RoundedRectangleBorder(
@@ -128,5 +129,11 @@ class _OnBoardPageState extends State<OnBoardPage> {
         ),
       ),
     );
+  }
+
+  Future onboardDone() async {
+    final ShowOnboard showHome = GetMeFromHive.getShowOnboard;
+    showHome.showOnboard = false;
+    await showHome.save();
   }
 }

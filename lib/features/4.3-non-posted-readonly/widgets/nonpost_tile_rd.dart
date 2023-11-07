@@ -90,7 +90,7 @@ class NonpostTile extends StatelessWidget with NonPostedMixin {
                             const SizedBox(width: 15),
                             Text(
                               NumberFormat('#,##0.00')
-                                  .format(totalForOneItem(nonPost)),
+                                  .format(nonPost.totalNonPosted),
                               style: Theme.of(context).textTheme.titleSmall,
                             ),
                           ],

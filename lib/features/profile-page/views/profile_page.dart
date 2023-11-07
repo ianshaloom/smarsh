@@ -2,12 +2,12 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../constants/hive_constants.dart';
 import '../../../global/helpers/snacks.dart';
-import '../../2-authentification/services/auth_service.dart';
-import '../../2-authentification/services/auth_user.dart';
-import '../../3-google-auth/services/google_service.dart';
+import '../../2-Authentification/2-authentification/services/auth_service.dart';
+import '../../2-Authentification/2-authentification/services/auth_user.dart';
+import '../../2-Authentification/3-google-auth/services/google_service.dart';
 import '../../../services/cloud/cloud_product.dart';
+import '../widgets/check_new_update.dart';
 
 class ProfilePage extends StatefulWidget {
   final CloudUser cloudUser;
@@ -32,78 +32,126 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () {
-              _logOutDialog(context);
-            },
+            icon: const Icon(Icons.edit_rounded),
+            onPressed: () {},
           ),
         ],
       ),
       body: Builder(builder: (context) {
-        return ListView(
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Container(
-              alignment: Alignment.center,
-              child: CircleAvatar(
-                backgroundImage: NetworkImage(widget.cloudUser.url, scale: 1),
-                radius: 50,
-              ),
-            ),
-            const SizedBox(height: 20),
-            ListTile(
-              leading: const SizedBox(
-                width: 50,
-                height: 50,
-                child: Icon(
-                  Icons.person_outline,
-                  size: 30,
-                ),
-              ),
-              title: const Text('Name'),
-              subtitle: Text(widget.cloudUser.username),
-            ),
-            ListTile(
-              leading: const SizedBox(
-                width: 50,
-                height: 50,
-                child: Icon(
-                  Icons.email_rounded,
-                  size: 30,
-                ),
-              ),
-              title: const Text('Email'),
-              subtitle: Text(widget.cloudUser.email),
-            ),
-            // change password button
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 10,
-              ),
-              child: FilledButton.tonal(
-                onPressed: () {},
-                style: FilledButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+            Column(
+              children: [
+                const SizedBox(height: 5),
+                Container(
+                  alignment: Alignment.center,
+                  child: CircleAvatar(
+                    backgroundImage:
+                        NetworkImage(widget.cloudUser.url, scale: 1),
+                    radius: 50,
                   ),
-                  minimumSize: const Size.fromHeight(60),
                 ),
-                child: const Text('Change Password'),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              child: FilledButton(
-                onPressed: () {},
-                style: FilledButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                const SizedBox(height: 10),
+                ListTile(
+                  leading: const SizedBox(
+                    width: 50,
+                    height: 50,
+                    child: Icon(
+                      Icons.person_outline,
+                      size: 30,
+                    ),
                   ),
-                  minimumSize: const Size.fromHeight(60),
+                  title: const Text('Name'),
+                  subtitle: Text(widget.cloudUser.username),
                 ),
-                child: const Text('Delete Account'),
-              ),
+                ListTile(
+                  leading: const SizedBox(
+                    width: 50,
+                    height: 50,
+                    child: Icon(
+                      Icons.email_rounded,
+                      size: 30,
+                    ),
+                  ),
+                  title: const Text('Email'),
+                  subtitle: Text(widget.cloudUser.email),
+                ),
+                ListTile(
+                  leading: const SizedBox(
+                    width: 50,
+                    height: 50,
+                    child: Icon(
+                      Icons.admin_panel_settings_rounded,
+                      size: 30,
+                    ),
+                  ),
+                  title: const Text('User Role'),
+                  subtitle: Text(widget.cloudUser.role),
+                ),
+                // change password button
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: FilledButton.tonal(
+                    onPressed: () {},
+                    style: FilledButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      minimumSize: const Size.fromHeight(60),
+                    ),
+                    child: const Text('Change Password'),
+                  ),
+                ),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  child: FilledButton.tonal(
+                    onPressed: () {},
+                    style: FilledButton.styleFrom(
+                      backgroundColor:
+                          Theme.of(context).colorScheme.errorContainer,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      minimumSize: const Size.fromHeight(60),
+                    ),
+                    child: const Text('Delete Account'),
+                  ),
+                ),
+              ],
             ),
+
+            Column(
+              children: [
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  child: FilledButton(
+                    onPressed: () {
+                      _logOutDialog(context);
+                    },
+                    style: FilledButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      minimumSize: const Size.fromHeight(60),
+                    ),
+                    child: const Text('Sign Out'),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    _checkNewUpdateDialog();
+                  },
+                  child: const Text(
+                    'Check for Updates',
+                    style: TextStyle(fontSize: 12),
+                  ),
+                )
+              ],
+            )
+
             // delete account button
           ],
         );
@@ -111,28 +159,47 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  void _logOutDialog(BuildContext cxt) {
+  void _logOutDialog(BuildContext cxt) async {
+    final bool confirm = await showDialog(
+      context: cxt,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Sign Out'),
+          content: const Text('Are you sure you want to sign out?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, false);
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, true);
+              },
+              child: const Text('Log Out'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm) {
+      await _logOut();
+    }
+  }
+
+  void _checkNewUpdateDialog() {
     showDialog(
-        context: cxt,
-        builder: (context) => AlertDialog(
-              title: const Text('Log Out'),
-              content: const Text('Are you sure you want to log out?'),
-              actions: [
-                TextButton(
-                    onPressed: () {
-                      _logOut();
-                    },
-                    child: const Text('Yes')),
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('No'),
-                ),
-              ],
-            ));
+      context: context,
+      builder: (context) {
+        return const UpdateWidgetDialog();
+      },
+    );
   }
 
   Future<void> _logOut() async {
-    if (widget.cloudUser.url != profilePhotoUrl) {
+    if (widget.cloudUser.signInProvider == 'google') {
       await GoogleService.google().logOut();
       await AuthService.firebase().logOut();
     } else {

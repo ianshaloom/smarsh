@@ -1,6 +1,11 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 
+import '../../../global/helpers/snacks.dart';
 import '../../../services/cloud/cloud_product.dart';
+import '../../../services/cloud/cloud_storage_exceptions.dart';
+import '../../../services/cloud/firebase_cloud_storage.dart';
 import '../services/stock_taking_mixin.dart';
 import '../widgets/count_dialog.dart';
 
@@ -106,6 +111,20 @@ class _SearchPageState extends State<SearchPage> {
       context: cxt,
       builder: (context) => CountingDialog(product: product),
     );
+  }
+
+  void addCount(
+      List<dynamic> count, String productCode, BuildContext cxt) async {
+    try {
+      await FirebaseCloudStorage()
+          .updateCountListProduct(
+            documentId: productCode,
+            count: count,
+          )
+          .then((value) => Snack().cloudSuccess(0, cxt));
+    } on CouldNotUpdateException {
+      Snack().cloudError(0, cxt);
+    }
   }
 }
 

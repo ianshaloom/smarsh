@@ -5,7 +5,7 @@ import 'package:smarsh/services/cloud/cloud_storage_exceptions.dart';
 
 import '../../../global/helpers/snacks.dart';
 import '../entities/cloud_nonposted.dart';
-import '../services/non_posted_service.dart';
+import '../services/non_posted_service_rd.dart';
 import '../widgets/edit_textfield.dart';
 
 class EditNonpostItem extends StatelessWidget {

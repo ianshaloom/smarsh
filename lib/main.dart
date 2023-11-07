@@ -1,16 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
-import 'package:provider/provider.dart';
 
-import 'features/1-splash-onboard-landing/services/onboard_service.dart';
-import 'features/1-splash-onboard-landing/views/onboard_page.dart';
-import 'features/2-authentification/services/auth_user.dart';
-import 'global/providers/smarsh_providers.dart';
-import 'features/1-splash-onboard-landing/views/landing_page.dart';
-import 'features/2-authentification/services/auth_service.dart';
-import 'features/2-authentification/views/verify_email_page.dart';
-import 'features/4-home-page/view/home_page.dart';
+import 'app.dart';
+import 'features/2-Authentification/2-authentification/services/auth_service.dart';
+import 'services/hive/models/show_home_model/show_home.dart';
+import 'services/hive/service/hive_constants.dart';
 import 'services/hive/service/hive_service.dart';
 
 void main() async {
@@ -28,91 +23,10 @@ void main() async {
   await HiveService.registerAdapters();
   await HiveService.initFlutter(appDocumentDir.path);
 
-  runApp(SmarshApp(showhome: await OnboardService.getShowHome));
+  final bool getShowHome = HiveBoxes.getShowOnboardBox.isEmpty;
+  getShowHome
+      ? await HiveShowHome().addShowHome(ShowOnboard(showOnboard: true))
+      : null;
+
+  runApp(const SmarshApp());
 }
-
-class SmarshApp extends StatelessWidget {
-  final bool showhome;
-  const SmarshApp({super.key, required this.showhome});
-
-  @override
-  Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider<AppProviders>(
-          create: (context) => AppProviders(),
-        ),
-      ],
-      child: MaterialApp(
-        title: 'Smarsh',
-        theme: ThemeData(
-          // brightness: Brightness.dark,
-          fontFamily: 'Montserrat',
-          colorSchemeSeed: Colors.green,
-          useMaterial3: true,
-        ),
-        debugShowCheckedModeBanner: false,
-        home: showhome
-            ? StreamBuilder(
-                stream: AppService.firebase().authStateChanges,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.active) {
-                    final user = snapshot.data;
-
-                    if (user != AuthUser.empty) {
-                      if (user!.isEmailVerified) {
-                        return const HomePage();
-                      } else {
-                        return const VerifyEmailPage();
-                      }
-                    } else {
-                      return const LandingPage();
-                    }
-                  } else {
-                    return const Scaffold(
-                      body: Center(
-                        child: SizedBox(
-                          height: 75,
-                          width: 75,
-                          child: CircularProgressIndicator(),
-                        ),
-                      ),
-                    );
-                  }
-                },
-              )
-            : const OnBoardPage(),
-      ),
-    );
-  }
-}
-// 0
-
-// StreamBuilder(
-//       stream: AppService.firebase().authStateChanges,
-//       builder: (context, snapshot) {
-//         if (snapshot.connectionState == ConnectionState.active) {
-//           final user = snapshot.data;
-
-//           if (user != AuthUser.empty) {
-//             if (user!.isEmailVerified) {
-//               return const HomePage();
-//             } else {
-//               return const VerifyEmailPage();
-//             }
-//           } else {
-//             return const LandingPage();
-//           }
-//         } else {
-//           return const Scaffold(
-//             body: Center(
-//               child: SizedBox(
-//                 height: 75,
-//                 width: 75,
-//                 child: CircularProgressIndicator(),
-//               ),
-//             ),
-//           );
-//         }
-//       },
-//     )

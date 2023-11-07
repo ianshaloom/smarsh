@@ -5,15 +5,23 @@ class CloudNonPosted {
   final String name;
   final int expectedCount;
   final int recentCount;
+  final double sellingsPrice;
   // final int lastCount;
   // final int sales;
   // final int purchases;
   int? _nonPosted;
+  double? _totalNonPosted;
 
   int get nonPosted {
     _nonPosted = recentCount - expectedCount;
 
     return _nonPosted!;
+  }
+
+  double get totalNonPosted {
+    _totalNonPosted = sellingsPrice * nonPosted;
+
+    return _totalNonPosted!;
   }
 
   // named constructor
@@ -22,6 +30,7 @@ class CloudNonPosted {
     required this.name,
     required this.expectedCount,
     required this.recentCount,
+    required this.sellingsPrice,
     // required this.lastCount,
     // required this.sales,
     // required this.purchases,
@@ -33,12 +42,13 @@ class CloudNonPosted {
       : id = documentSnapshot.id,
         name = documentSnapshot['name'],
         expectedCount = documentSnapshot['expectedCount'],
-        recentCount = documentSnapshot['recentCount']
-        // lastCount = documentSnapshot['lastCount'],
-        // sales = documentSnapshot['sales'],
-        // purchases = documentSnapshot['purchases']
-        
-        ;
+        recentCount = documentSnapshot['recentCount'],
+        sellingsPrice = documentSnapshot['sellingsPrice']
+  // lastCount = documentSnapshot['lastCount'],
+  // sales = documentSnapshot['sales'],
+  // purchases = documentSnapshot['purchases']
+
+  ;
 
   // from query snapshot
   CloudNonPosted.fromQuerySnapshot(
@@ -46,10 +56,12 @@ class CloudNonPosted {
       : id = documentSnapshot.id,
         name = documentSnapshot['name'],
         expectedCount = documentSnapshot['expectedCount'],
-        recentCount = documentSnapshot['recentCount']
-        // lastCount = documentSnapshot['lastCount'],
-        // sales = documentSnapshot['sales'],
-        // purchases = documentSnapshot['purchases']
-        
-        ;
+        recentCount = documentSnapshot['recentCount'],
+        sellingsPrice = documentSnapshot['sellingsPrice']
+  // lastCount = documentSnapshot['lastCount'],
+  // sales = documentSnapshot['sales'],
+  // purchases = documentSnapshot['purchases']
+
+  ;
 }
+

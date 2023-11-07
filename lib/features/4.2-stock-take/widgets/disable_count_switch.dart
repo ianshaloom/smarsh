@@ -12,7 +12,8 @@ class DisableStockTake extends StatefulWidget {
 class _DisableStockTakeState extends State<DisableStockTake> {
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
+    return FutureBuilder<bool>(
+        initialData: false,
         future: FirebaseCloudApp().isStockTakeDisabled('stock-take'),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
