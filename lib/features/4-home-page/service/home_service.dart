@@ -14,11 +14,37 @@ class NonPostLocalDataSrcRd {
   factory NonPostLocalDataSrcRd() => instance;
 
   // Get all products from local data source
-  Future<List<LocalProduct>> getProducts(BuildContext context) async {
+  Future<List<LocalProduct>> getProducts(
+      BuildContext context, bool refresh) async {
     try {
       List<LocalProduct> products = [];
       //
-      if (GetMeFromHive.getAllLocalProducts.isEmpty) {
+      if (GetMeFromHive.getAllLocalProducts.isEmpty && !refresh) {
+        List<CloudProduct> cproducts = [];
+        List<LocalProduct> lproducts = [];
+        cproducts = await FirebaseCloudStorage().getAllStock();
+
+        for (var pr in cproducts) {
+          final localProduct = LocalProduct(
+            productName: pr.productName,
+            buyingPrice: pr.buyingPrice,
+            sellingPrice: pr.sellingPrice,
+            stockCount: pr.stockCount,
+            documentId: pr.documentId,
+          );
+
+          lproducts.add(localProduct);
+          await HiveLocalProduct().addProduct(localProduct);
+        }
+
+        products = lproducts;
+        // sort products by name
+        lproducts.sort((a, b) => a.productName.compareTo(b.productName));
+        return lproducts;
+      } else if (refresh) {
+        //clear hive
+        await HiveLocalProduct().deleteAllProducts();
+
         List<CloudProduct> cproducts = [];
         List<LocalProduct> lproducts = [];
         cproducts = await FirebaseCloudStorage().getAllStock();

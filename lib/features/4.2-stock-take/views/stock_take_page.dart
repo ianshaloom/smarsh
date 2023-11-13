@@ -259,7 +259,7 @@ class _CloudProductTile extends StatelessWidget {
         trailing: Padding(
           padding: const EdgeInsets.only(right: 10),
           child: Text(
-            totalCount.toString(),
+            product.totalCount.toString(),
             style: Theme.of(context).textTheme.titleMedium!.copyWith(
                   fontWeight: FontWeight.w600,
                   fontSize: 15,

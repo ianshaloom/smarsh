@@ -31,11 +31,15 @@ mixin StockTakingMixin {
     }
   }
 
-  int getCount(List<int> counts) {
-    // add all integers in the list
-    int count =
-        counts.fold(0, (previousValue, element) => previousValue + element);
-    return count;
+  void removeCount(
+    List<dynamic> count,
+    String productCode,
+  ) async {
+    // update cloud counted product with new list of counts
+    await FirebaseCloudStorage().updateCountListProduct(
+      documentId: productCode,
+      count: count,
+    );
   }
 
   // export Cloud Product Count to final count model and save to device
@@ -49,12 +53,11 @@ mixin StockTakingMixin {
 
       for (int i = 0; i < cloudCount.length; i++) {
         final CloudProduct product = cloudCount[i];
-        final List<int> count = product.count.cast<int>().toList();
 
         final FinalCountModel f = FinalCountModel(
           productId: product.documentId,
           productName: product.productName,
-          count: getCount(count),
+          count: product.totalCount,
           date: DateTime.now(),
         );
 
@@ -87,7 +90,7 @@ mixin StockTakingMixin {
       for (var e in cloudCount) {
         data.add(e.productName);
         data.add(e.stockCount.toString());
-        data.add(getCount(e.count.cast<int>().toList()).toString());
+        data.add(e.totalCount.toString());
         listOfLists.add(data);
         data = [];
       }

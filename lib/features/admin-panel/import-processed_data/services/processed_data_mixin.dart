@@ -4,8 +4,8 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:smarsh/global/helpers/snacks.dart';
 
+import '../../../../global/helpers/snacks.dart';
 import '../../../../services/hive/models/processed_stock_model/processed_stock.dart';
 import '../../../../global/utils/shared_classes.dart';
 import '../../../../services/cloud/cloud_product.dart';

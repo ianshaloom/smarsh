@@ -1,14 +1,14 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'package:smarsh/features/2-Authentification/constants.dart';
-import 'package:smarsh/features/2-Authentification/model/auth_user_entity.dart';
 
 import '../../../../services/cloud/cloud_storage_exceptions.dart';
 import '../../../../services/cloud/firebase_cloud_storage.dart';
 import '../../3-google-auth/widgets/google_signin.dart';
 import '../../../../global/helpers/snacks.dart';
 import '../../auth_exceptions.dart';
+import '../../constants.dart';
+import '../../model/auth_user_entity.dart';
 import '../provider/auth_provider.dart';
 import 'forgot_password_page.dart';
 import '../widgets/auth_widgets.dart';
@@ -214,6 +214,7 @@ class SignInPage extends StatelessWidget {
           role: 'user',
           url: authUserProfilePicture,
           provider: 'email&pass',
+          color: 'green',
         );
       } else if (cloudUser.signInProvider != 'email&pass') {
         await FirebaseCloudUsers().updateUser(
@@ -223,6 +224,7 @@ class SignInPage extends StatelessWidget {
           role: cloudUser.role,
           url: cloudUser.url,
           provider: 'email&pass',
+          color: cloudUser.color,
         );
       }
     } on CouldNotCreateException {

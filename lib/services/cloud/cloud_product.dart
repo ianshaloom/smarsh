@@ -1,7 +1,10 @@
 // import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 
-// @immutable
+import '../../constants/constants.dart';
+import '../../global/helpers/data_helper.dart';
+
 class CloudProduct {
   final String documentId;
 
@@ -14,6 +17,26 @@ class CloudProduct {
   final int stockCount;
 
   List<dynamic> count;
+
+  int get totalCount {
+    int total;
+    List<Map<String, dynamic>> counts = count.cast<Map<String, dynamic>>();
+    counts.isEmpty ? total = 0 : total = DataHelper.countFromMap(counts);
+    return total;
+  }
+
+  List<ItemCount> get itemsCount {
+    List<Map<String, dynamic>> counts = count.cast<Map<String, dynamic>>();
+    if (counts.isEmpty) {
+      return [];
+    }
+    List<ItemCount> itemsCount = [];
+
+    for (var e in counts) {
+      itemsCount.add(ItemCount.fromMap(e));
+    }
+    return itemsCount;
+  }
 
   // required constructor
   CloudProduct({
@@ -52,6 +75,19 @@ class CloudUser {
   final String role;
   final String url;
   final String signInProvider;
+  final String color;
+
+  // Color get colorValue {
+  //   if (color == 'green') {
+  //     return c1;
+  //   } else if (color == 'blue') {
+  //     return c2;
+  //   } else if (color == 'orange') {
+  //     return c3;
+  //   } else {
+  //     return c4;
+  //   }
+  // }
 
   CloudUser({
     required this.userId,
@@ -60,6 +96,7 @@ class CloudUser {
     required this.role,
     required this.url,
     required this.signInProvider,
+    required this.color,
   });
 
   CloudUser.fromQuerySnapshot(
@@ -69,9 +106,8 @@ class CloudUser {
         email = documentSnapshot['email'],
         role = documentSnapshot['role'],
         url = documentSnapshot['url'],
-        signInProvider = documentSnapshot['provider']
-        ;
-
+        signInProvider = documentSnapshot['provider'],
+        color = documentSnapshot['color'];
 
   CloudUser.fromDocSnapshot(
       {required DocumentSnapshot<Map<String, dynamic>> documentSnapshot})
@@ -80,5 +116,31 @@ class CloudUser {
         email = documentSnapshot['email'],
         role = documentSnapshot['role'],
         url = documentSnapshot['url'],
-        signInProvider = documentSnapshot['provider'];
+        signInProvider = documentSnapshot['provider'],
+        color = documentSnapshot['color'];
+}
+
+class ItemCount {
+  final String color;
+  final int count;
+  Color get colorValue {
+    if (color == 'green') {
+      return c1;
+    } else if (color == 'blue') {
+      return c2;
+    } else if (color == 'orange') {
+      return c3;
+    } else {
+      return c4;
+    }
+  }
+
+  ItemCount({
+    required this.color,
+    required this.count,
+  });
+
+  ItemCount.fromMap(Map<String, dynamic> map)
+      : color = map['color'],
+        count = map['count'];
 }

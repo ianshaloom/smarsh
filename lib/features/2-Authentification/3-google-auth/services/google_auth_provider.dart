@@ -73,7 +73,7 @@ class GoogleAuthProvida implements GoogleProvider {
   Future<void> logOut() async {
     try {
       await googleSignIn.disconnect();
-    } catch (_) {
+    } catch (e) {
       throw GenericAuthException();
     }
   }

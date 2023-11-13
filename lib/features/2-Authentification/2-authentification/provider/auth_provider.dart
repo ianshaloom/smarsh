@@ -1,6 +1,6 @@
-import 'package:smarsh/features/2-Authentification/2-authentification/data/auth_remote_data_source_firebase.dart';
 
 import '../../model/auth_user_entity.dart';
+import '../data/auth_remote_data_source_firebase.dart';
 import '../data/auth_repository_impl.dart';
 
 class AuthProvider {

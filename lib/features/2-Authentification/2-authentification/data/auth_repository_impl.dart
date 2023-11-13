@@ -40,9 +40,6 @@ class AuthRepositoryImpl implements AuthRepository {
       email: email,
       password: password,
     );
-
-    print(
-        'authUserModel=====================>: ${authUserModel.toEntity().name}');
     return authUserModel.toEntity();
   }
 

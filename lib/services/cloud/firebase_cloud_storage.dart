@@ -201,6 +201,7 @@ class FirebaseCloudUsers {
     required String role,
     required String url,
     required String provider,
+    required String color,
   }) async {
     String customDocumentId = userId;
     final document = {
@@ -209,6 +210,8 @@ class FirebaseCloudUsers {
       'email': email,
       'role': role,
       'url': url,
+      'provider': provider,
+      'color': color,
     };
 
     try {
@@ -222,6 +225,7 @@ class FirebaseCloudUsers {
         role: fetchedUser['role'],
         url: fetchedUser['url'],
         signInProvider: fetchedUser['provider'],
+        color: fetchedUser['color'],
       );
     } catch (e) {
       throw CouldNotCreateException();
@@ -236,6 +240,7 @@ class FirebaseCloudUsers {
     required String role,
     required String url,
     required String provider,
+    required String color,
   }) async {
     try {
       await users.doc(userId).update({
@@ -244,6 +249,7 @@ class FirebaseCloudUsers {
         'role': role,
         'url': url,
         'provider': provider,
+        'color': color,
       });
 
       final fetchedUser = await users.doc(userId).get();
@@ -254,6 +260,7 @@ class FirebaseCloudUsers {
         role: fetchedUser['role'],
         url: fetchedUser['url'],
         signInProvider: fetchedUser['provider'],
+        color: fetchedUser['color'],
       );
     } catch (e) {
       throw CouldNotUpdateException();
@@ -299,6 +306,7 @@ class FirebaseCloudUsers {
           role: fetchedUser['role'],
           url: fetchedUser['url'],
           signInProvider: fetchedUser['provider'],
+          color: fetchedUser['color'],
         );
       } else {
         return null;

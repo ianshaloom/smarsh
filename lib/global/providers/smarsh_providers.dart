@@ -1,23 +1,39 @@
 import 'package:flutter/material.dart';
-import 'package:smarsh/features/2-Authentification/2-authentification/services/auth_service.dart';
-import 'package:smarsh/services/cloud/firebase_cloud_storage.dart';
+
+import '../../features/2-Authentification/2-authentification/services/auth_service.dart';
+import '../../features/2-Authentification/constants.dart';
+import '../../services/cloud/cloud_product.dart';
+import '../../services/cloud/firebase_cloud_storage.dart';
 
 class AppProviders with ChangeNotifier {
-  bool _isDarkMode = false;
   bool _isAdmin = false;
+  CloudUser? _userr;
 
-  bool get isDarkMode => _isDarkMode;
   bool get isAdmin => _isAdmin;
-
-
-  void toggleAdmin() async{
-    final user = await FirebaseCloudUsers().singleUser(documentId: AppService.firebase().currentUser!.id);
-    user!.role == 'admin' ? _isAdmin = true : _isAdmin = false;
-    notifyListeners();
+  CloudUser? get user {
+    if (_userr == null) {
+      return CloudUser(
+        userId: 'userId',
+        username: 'Username',
+        email: 'info@nedak.com',
+        role: 'user',
+        url: authUserProfilePicture,
+        signInProvider: 'google',
+        color: 'green',
+      );
+    }
+    return _userr;
   }
 
-  void toggleDarkMode() {
-    _isDarkMode = !_isDarkMode;
-    notifyListeners();
+  Future toggleAdmin() async {
+    final user = await FirebaseCloudUsers()
+        .singleUser(documentId: AppService.firebase().currentUser!.id);
+
+    if (user == null) {
+      _isAdmin = false;
+    } else {
+      _userr = user;
+      user.role == 'admin' ? _isAdmin = true : _isAdmin = false;
+    }
   }
 }

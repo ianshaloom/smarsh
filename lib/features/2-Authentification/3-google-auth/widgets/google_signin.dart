@@ -102,6 +102,7 @@ class _GoSignInWidgetState extends State<GoSignInWidget> {
           role: 'user',
           url: googleUser.url,
           provider: 'google',
+          color: 'green',
         );
       } else if (cloudUser.signInProvider != 'google') {
         await FirebaseCloudUsers().updateUser(
@@ -111,6 +112,7 @@ class _GoSignInWidgetState extends State<GoSignInWidget> {
           role: cloudUser.role,
           url: googleUser.url,
           provider: 'google',
+          color: cloudUser.color,
         );
       }
     } on CouldNotCreateException {

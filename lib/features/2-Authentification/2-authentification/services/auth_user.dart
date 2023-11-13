@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart' show User;
-import 'package:smarsh/services/hive/service/hive_constants.dart';
+
+import '../../../../services/hive/service/hive_constants.dart';
 
 
 class AuthUser {

@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../../../global/providers/smarsh_providers.dart';
 import '../../../services/cloud/cloud_product.dart';
 import '../../../services/cloud/firebase_cloud_storage.dart';
 import '../services/stock_taking_mixin.dart';
@@ -23,6 +25,7 @@ class _CountingDialogState extends State<CountingDialog> with StockTakingMixin {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final color = Theme.of(context).colorScheme;
+    CloudUser user = context.read<AppProviders>().user!;
 
     return StreamBuilder(
       stream: FirebaseCloudStorage()
@@ -40,8 +43,8 @@ class _CountingDialogState extends State<CountingDialog> with StockTakingMixin {
 
         //if (snapshot.hasData) {
         final CloudProduct cloudCountedProduct = snapshot.data as CloudProduct;
-        final List<int> cloudCounts =
-            cloudCountedProduct.count.cast<int>().toList();
+        final List<ItemCount> countedItems = cloudCountedProduct.itemsCount;
+
         //counts.addAll(cloudCounts);
         return Dialog(
           insetPadding:
@@ -83,7 +86,7 @@ class _CountingDialogState extends State<CountingDialog> with StockTakingMixin {
                               ),
                               const SizedBox(height: 10),
                               Text(
-                                widget.product.productName,
+                                cloudCountedProduct.productName,
                                 //textAlign: TextAlign.center,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -112,7 +115,7 @@ class _CountingDialogState extends State<CountingDialog> with StockTakingMixin {
                               ),
                               const SizedBox(height: 10),
                               Text(
-                                _getCount(cloudCounts).toString(),
+                                cloudCountedProduct.totalCount.toString(),
                                 style: Theme.of(context)
                                     .textTheme
                                     .titleSmall!
@@ -134,7 +137,7 @@ class _CountingDialogState extends State<CountingDialog> with StockTakingMixin {
                 ),
                 Flexible(
                   flex: 1,
-                  child: cloudCounts.isEmpty
+                  child: countedItems.isEmpty
                       ? const SizedBox(
                           height: 150,
                           child: Center(child: Text('No counts recorded yet')),
@@ -142,7 +145,7 @@ class _CountingDialogState extends State<CountingDialog> with StockTakingMixin {
                       : ListView.builder(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
                           scrollDirection: Axis.horizontal,
-                          itemCount: cloudCounts.length,
+                          itemCount: countedItems.length,
                           itemBuilder: (context, index) {
                             return Center(
                               child: Stack(
@@ -152,11 +155,17 @@ class _CountingDialogState extends State<CountingDialog> with StockTakingMixin {
                                         horizontal: 5),
                                     child: CircleAvatar(
                                         radius: 45,
+                                        // backgroundColor:
+                                        //     countedItems[index].colorValue,
                                         child: Center(
                                           child: Text(
-                                            cloudCounts[index].toString(),
-                                            style: const TextStyle(
+                                            countedItems[index]
+                                                .count
+                                                .toString(),
+                                            style: TextStyle(
                                               fontWeight: FontWeight.bold,
+                                              color: countedItems[index]
+                                                  .colorValue,
                                             ),
                                           ),
                                         )),
@@ -167,7 +176,7 @@ class _CountingDialogState extends State<CountingDialog> with StockTakingMixin {
                                     child: IconButton(
                                       icon: Icon(
                                         CupertinoIcons.clear_circled_solid,
-                                        color: color.primary,
+                                        color: countedItems[index].colorValue,
                                       ),
                                       onPressed: () {
                                         _removeCount(
@@ -226,7 +235,7 @@ class _CountingDialogState extends State<CountingDialog> with StockTakingMixin {
                 ),
                 Flexible(
                   flex: 4,
-                  child: _numberKeypad(cloudCountedProduct),
+                  child: _numberKeypad(cloudCountedProduct, user.color),
                 ),
               ],
             ),
@@ -239,7 +248,7 @@ class _CountingDialogState extends State<CountingDialog> with StockTakingMixin {
     );
   }
 
-  Widget _numberKeypad(CloudProduct product) {
+  Widget _numberKeypad(CloudProduct product, String color) {
     return Column(
       children: [
         const SizedBox(height: 20),
@@ -284,45 +293,20 @@ class _CountingDialogState extends State<CountingDialog> with StockTakingMixin {
             ),
           ],
         ),
-        const SizedBox(height: 10),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Expanded(
-            //   child: TextButton(
-            //     onPressed: () {
-            //       _addCount(product, context);
-            //     },
-            //     child: const Text(
-            //       'Add Count',
-            //       style: TextStyle(fontSize: 15),
-            //     ),
-            //   ),
-            // ),
-            /*Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: FilledButton(
-                  onPressed: () => _addCount(product, context),
-                  style: FilledButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    minimumSize: const Size.fromHeight(60),
-                  ),
-                  child: const Text(
-                    'Add Count',
-                  ),
-                ),
+        Padding(
+          padding: const EdgeInsets.only(left: 10, right: 10, top: 10),
+          child: FilledButton(
+            onPressed: () => _addCount(product, context, color),
+            style: FilledButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
               ),
-            ),*/
-            const SizedBox(height: 30),
-            FloatingActionButton(
-              // mini: true,
-              onPressed: () => _addCount(product, context),
-              child: const Icon(Icons.add),
+              minimumSize: const Size.fromHeight(60),
             ),
-          ],
+            child: const Text(
+              'Add Count',
+            ),
+          ),
         ),
       ],
     );
@@ -342,7 +326,7 @@ class _CountingDialogState extends State<CountingDialog> with StockTakingMixin {
     );
   }
 
-  void _addCount(CloudProduct product, BuildContext cxt) async {
+  void _addCount(CloudProduct product, BuildContext cxt, String color) async {
     FocusScope.of(context).unfocus();
     final form = _formKey.currentState!;
     List<dynamic> count = product.count;
@@ -350,7 +334,11 @@ class _CountingDialogState extends State<CountingDialog> with StockTakingMixin {
     if (form.validate()) {
       final String productCode = product.documentId;
       final int itemCount = int.parse(_countContoller.text.trim());
-      count.add(itemCount);
+      final Map<String, dynamic> countMap = {
+        'color': color,
+        'count': itemCount,
+      };
+      count.add(countMap);
       _clearControllers();
       addCount(count, productCode, cxt);
     }
@@ -362,36 +350,13 @@ class _CountingDialogState extends State<CountingDialog> with StockTakingMixin {
     count.removeAt(index);
 
     // update cloud counted product with new list of counts
-    await FirebaseCloudStorage().updateCountListProduct(
-      documentId: product.documentId,
-      count: product.count,
-    );
+    removeCount(count, product.documentId);
   }
 
   // clear controllers and exit page
   void _clearControllers() {
     _countContoller.clear();
     // Navigator.pop(context);
-  }
-
-  // return a ProductCountModel from a ProductModel
-  // CloudProduct _productToCount(CloudProduct product) {
-  //   return GetMeFromHive.getAllItemCounts.firstWhere(
-  //     (element) => element.productId == product.documentId,
-  //     orElse: () => ItemCountModel(
-  //       productId: product.documentId,
-  //       productName: product.productName,
-  //       count: [],
-  //     ),
-  //   );
-  // }
-
-  // return the current count of a product from a list of counts
-  int _getCount(List<int> counts) {
-    // add all integers in the list
-    int count =
-        counts.fold(0, (previousValue, element) => previousValue + element);
-    return count;
   }
 }
 

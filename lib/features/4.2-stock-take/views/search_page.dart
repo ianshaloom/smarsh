@@ -218,7 +218,7 @@ class _CloudProductTile extends StatelessWidget with StockTakingMixin {
         trailing: Padding(
           padding: const EdgeInsets.only(right: 10),
           child: Text(
-            getCount(product.count.cast<int>().toList()).toString(),
+            product.totalCount.toString(),
           ),
         ),
       ),

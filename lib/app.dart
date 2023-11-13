@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 
+import 'constants/color_schemes.dart';
 import 'features/1-splash-onboard-landing/views/landing_page.dart';
 import 'features/1-splash-onboard-landing/views/onboard_page.dart';
 import 'features/2-Authentification/2-authentification/provider/auth_provider.dart';
@@ -24,13 +25,21 @@ class SmarshApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp(
-        title: 'Smarsh',
+        title: 'Nedak',
+        // theme: ThemeData(
+        //   brightness: Brightness.dark,
+        //   fontFamily: 'Montserrat',
+        //   colorSchemeSeed: Colors.green,
+        //   useMaterial3: true,
+        // ),
         theme: ThemeData(
-          // brightness: Brightness.dark,
-          fontFamily: 'Montserrat',
-          colorSchemeSeed: Colors.green,
-          useMaterial3: true,
-        ),
+            fontFamily: 'Montserrat',
+            useMaterial3: true,
+            colorScheme: lightColorScheme),
+        darkTheme: ThemeData(
+            fontFamily: 'Montserrat',
+            useMaterial3: true,
+            colorScheme: darkColorScheme),
         debugShowCheckedModeBanner: false,
         home: ValueListenableBuilder(
           valueListenable: HiveBoxes.getShowOnboardBox.listenable(),
