@@ -1,7 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'package:nedak/features/2-Authentification/model/auth_user_entity.dart';
+import 'package:smarsh/features/2-Authentification/model/auth_user_entity.dart';
 
 import '../../../../services/hive/service/hive_constants.dart';
 import '../../3-google-auth/widgets/google_signin.dart';

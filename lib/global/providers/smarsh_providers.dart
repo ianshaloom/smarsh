@@ -15,7 +15,7 @@ class AppProviders with ChangeNotifier {
       return CloudUser(
         userId: 'userId',
         username: 'Username',
-        email: 'info@nedak.com',
+        email: 'info@smarsh.com',
         role: 'user',
         url: authUserProfilePicture,
         signInProvider: 'google',

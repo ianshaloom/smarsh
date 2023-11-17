@@ -25,7 +25,7 @@ class SmarshApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp(
-        title: 'Nedak',
+        title: 'Smarsh',
         // theme: ThemeData(
         //   brightness: Brightness.dark,
         //   fontFamily: 'Montserrat',

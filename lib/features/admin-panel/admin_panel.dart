@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'add-new-product/views/add_product_page.dart';
 import 'import-processed_data/views/processed_data_page.dart';
+import 'manage-users/views/manage_user.dart';
 import 'manage_stock/views/manage_product.dart';
 import 'import-products/views/imported_products_page.dart';
 import 'generated-non-posted/views/nonposted_page.dart';
@@ -130,7 +131,7 @@ class _AdminPanelState extends State<AdminPanel> {
           context: context,
           barrierDismissible: true,
           builder: (_) => const Center(
-            child: Text('Users Privileges'),
+            child: ManageUsersPage(),
           ),
         );
 

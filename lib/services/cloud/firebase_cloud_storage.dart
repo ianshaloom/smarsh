@@ -287,7 +287,7 @@ class FirebaseCloudUsers {
   Future<List<CloudUser>> getAllUsers() async {
     final snapShot = await users.get();
     final fetchedUsers = snapShot.docs
-        .map((doc) => CloudUser.fromQuerySnapshot(documentSnapshot: doc))
+        .map((doc) => CloudUser.fromDocSnapshot(documentSnapshot: doc))
         .toList();
 
     return fetchedUsers;
