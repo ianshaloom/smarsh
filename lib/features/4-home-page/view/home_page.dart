@@ -225,14 +225,16 @@ class HomePage extends StatelessWidget {
                                       onTap: _home.navigateToNonPosted,
                                       title: 'Non-Posted',
                                       svg: noteSvg,
+                                      role: cloudUser.role,
                                     ),
                                   ),
                                   const SizedBox(width: 20),
                                   Expanded(
                                     child: HomePageTile(
-                                      onTap: _home.switchToAdmin,
+                                      onTap: _ifAdmin,
                                       title: 'Admin Panel',
                                       svg: adminSvg,
+                                      role: cloudUser.role,
                                     ),
                                   ),
                                 ],
@@ -290,6 +292,22 @@ class HomePage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _ifAdmin(BuildContext context, String role) {
+    if (role == 'admin') {
+      _home.switchToAdmin(context);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Access denied, please contact admin',
+            textAlign: TextAlign.center,
+          ),
+          duration: Duration(seconds: 3),
+        ),
+      );
+    }
   }
 }
 

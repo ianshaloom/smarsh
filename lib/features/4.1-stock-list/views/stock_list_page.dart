@@ -76,14 +76,9 @@ class _StockListPageState extends State<StockListPage> with StockListMixin {
         actions: [
           IconButton(
             onPressed: () async {
-              await showDialog(
-                barrierColor: Colors.black38,
-                context: context,
-                barrierDismissible: false,
-                builder: (_) => const RefreshLocalSrc(),
-              ).then((value) => setState(() {}));
+              exportToCsv(context, products);
             },
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.cloud_download_rounded),
           ),
         ],
         bottom: PreferredSize(
@@ -133,15 +128,25 @@ class _StockListPageState extends State<StockListPage> with StockListMixin {
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
-        child: ListView.builder(
-          itemCount: _searched.length,
-          itemBuilder: (context, index) {
-            _searched.sort((a, b) => a.productName.compareTo(b.productName));
-            return StockListTile(
-              product: _searched[index],
-              onTap: _drawProductDetailBottomSheet,
-            );
+        child: RefreshIndicator(
+          onRefresh: () async {
+            await showDialog(
+              barrierColor: Colors.black38,
+              context: context,
+              barrierDismissible: false,
+              builder: (_) => const RefreshLocalSrc(),
+            ).then((value) => setState(() {}));
           },
+          child: ListView.builder(
+            itemCount: _searched.length,
+            itemBuilder: (context, index) {
+              _searched.sort((a, b) => a.productName.compareTo(b.productName));
+              return StockListTile(
+                product: _searched[index],
+                onTap: _drawProductDetailBottomSheet,
+              );
+            },
+          ),
         ),
       ),
     );

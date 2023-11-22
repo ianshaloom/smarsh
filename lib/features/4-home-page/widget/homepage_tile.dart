@@ -5,17 +5,20 @@ class HomePageTile extends StatelessWidget {
   final Function onTap;
   final String title;
   final String svg;
+  final String role;
   const HomePageTile({
     super.key,
     required this.onTap,
     required this.title,
     required this.svg,
+    required this.role,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => onTap(context),
+      onTap: () =>
+          (title == 'Non-Posted') ? onTap(context) : onTap(context, role),
       child: Card(
         margin: EdgeInsets.symmetric(
           vertical: MediaQuery.of(context).size.height * 0.02,

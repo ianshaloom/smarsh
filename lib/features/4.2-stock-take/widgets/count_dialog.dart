@@ -179,8 +179,11 @@ class _CountingDialogState extends State<CountingDialog> with StockTakingMixin {
                                         color: countedItems[index].colorValue,
                                       ),
                                       onPressed: () {
-                                        _removeCount(
-                                            cloudCountedProduct, index);
+                                        (user.color !=
+                                                countedItems[index].color)
+                                            ? null
+                                            : _removeCount(
+                                                cloudCountedProduct, index);
                                       },
                                     ),
                                   ),

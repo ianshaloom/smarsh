@@ -87,6 +87,16 @@ class _ManageProductPageState extends State<ManageProductPage>
                       cloudStock.sort(
                           (a, b) => a.productName.compareTo(b.productName));
 
+                      if (cloudStock.isEmpty) {
+                        return const SliverFillRemaining(
+                          child: Center(
+                            child: Text(
+                              'Your stock list is empty',
+                            ),
+                          ),
+                        );
+                      }
+
                       return SliverList.builder(
                         itemCount: cloudStock.length,
                         itemBuilder: (context, index) {

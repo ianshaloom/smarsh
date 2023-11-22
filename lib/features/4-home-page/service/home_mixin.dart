@@ -34,50 +34,50 @@ class HomeMixin {
 
   final passController = TextEditingController();
   void switchToAdmin(BuildContext cxt) {
-    // Navigator.push(
-    //     cxt, MaterialPageRoute(builder: (context) => const AdminPanel()));
-    showModalBottomSheet(
-        context: cxt,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        builder: (context) => Container(
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom,
-                left: 10,
-              ),
-              //height: 100,
-              child: Padding(
-                padding: const EdgeInsets.only(top: 5, bottom: 15.0, right: 4),
-                child: Row(
-                  children: [
-                    Flexible(
-                        fit: FlexFit.tight,
-                        child: TextField(
-                          controller: passController,
-                          decoration: InputDecoration(
-                            hintText: 'Enter Password',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                        )),
-                    IconButton(
-                      icon: const Icon(Icons.check),
-                      onPressed: () {
-                        if (passController.text == 'admin') {
-                          passController.clear();
-                          Navigator.pop(context);
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const AdminPanel()));
-                        }
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ));
+    Navigator.push(
+        cxt, MaterialPageRoute(builder: (context) => const AdminPanel()));
+    // showModalBottomSheet(
+    //     context: cxt,
+    //     shape: RoundedRectangleBorder(
+    //       borderRadius: BorderRadius.circular(10),
+    //     ),
+    //     builder: (context) => Container(
+    //           padding: EdgeInsets.only(
+    //             bottom: MediaQuery.of(context).viewInsets.bottom,
+    //             left: 10,
+    //           ),
+    //           //height: 100,
+    //           child: Padding(
+    //             padding: const EdgeInsets.only(top: 5, bottom: 15.0, right: 4),
+    //             child: Row(
+    //               children: [
+    //                 Flexible(
+    //                     fit: FlexFit.tight,
+    //                     child: TextField(
+    //                       controller: passController,
+    //                       decoration: InputDecoration(
+    //                         hintText: 'Enter Password',
+    //                         border: OutlineInputBorder(
+    //                           borderRadius: BorderRadius.circular(10),
+    //                         ),
+    //                       ),
+    //                     )),
+    //                 IconButton(
+    //                   icon: const Icon(Icons.check),
+    //                   onPressed: () {
+    //                     if (passController.text == 'admin') {
+    //                       passController.clear();
+    //                       Navigator.pop(context);
+    //                       Navigator.push(
+    //                           context,
+    //                           MaterialPageRoute(
+    //                               builder: (context) => const AdminPanel()));
+    //                     }
+    //                   },
+    //                 ),
+    //               ],
+    //             ),
+    //           ),
+    //         ));
   }
 }

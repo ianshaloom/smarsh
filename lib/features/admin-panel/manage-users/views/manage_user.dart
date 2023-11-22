@@ -2,13 +2,12 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../global/helpers/snacks.dart';
 import '../../../../services/cloud/cloud_product.dart';
 import '../../../../services/cloud/cloud_storage_exceptions.dart';
 import '../../../../services/cloud/firebase_cloud_storage.dart';
 import '../services/manage_user_mixin.dart';
 import '../widgets/edit_item_dialog.dart';
-import '../widgets/manage_stock_tile.dart';
+import '../widgets/manage_user_tile.dart';
 
 class ManageUsersPage extends StatefulWidget {
   const ManageUsersPage({super.key});
@@ -19,7 +18,6 @@ class ManageUsersPage extends StatefulWidget {
 
 class _ManageUsersPageState extends State<ManageUsersPage>
     with ManageProductMixin {
-  Future<List<CloudUser>> _users = FirebaseCloudUsers().getAllUsers();
   late final FirebaseCloudUsers _cloudUsers;
 
   @override
@@ -30,33 +28,33 @@ class _ManageUsersPageState extends State<ManageUsersPage>
 
   @override
   Widget build(BuildContext context) {
-    List<CloudUser> prs = [];
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          SliverAppBar.medium(
+          SliverAppBar(
             backgroundColor: Theme.of(context).colorScheme.surface,
             title: const Text('Manage Users'),
             centerTitle: true,
+            titleTextStyle: Theme.of(context).textTheme.titleLarge!.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
             leading: IconButton(
               icon: const Icon(Icons.arrow_back_ios),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
-            
           ),
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 5),
             sliver: FutureBuilder(
-                future: _users,
+                future: _cloudUsers.getAllUsers(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.done) {
                     print('========> Connection state done');
                     if (snapshot.hasData) {
                       print('========> ${snapshot.data}');
                       List<CloudUser> users = snapshot.data as List<CloudUser>;
-                      prs = users;
                       users.sort((a, b) => a.username.compareTo(b.username));
 
                       return SliverList.builder(
@@ -151,11 +149,6 @@ class _ManageUsersPageState extends State<ManageUsersPage>
       );
 
       await _cloudUsers.deleteUser(documentId: model.documentId);
-
-      setState(() {
-        _users = _cloudUsers.getAllUsers();
-      });
-      _navigateBack(true);
     } catch (e) {
       throw CouldNotDeleteException;
     }
@@ -204,27 +197,8 @@ class _ManageUsersPageState extends State<ManageUsersPage>
         provider: model.signInProvider,
         color: model.color,
       );
-
-      setState(() {
-        _users = _cloudUsers.getAllUsers();
-      });
-      _navigateBack(false);
     } catch (e) {
       throw CouldNotUpdateException;
-    }
-  }
-
-  void _navigateBack(bool isDeleting) {
-    if (isDeleting) {
-      Navigator.of(context).pop();
-      Navigator.of(context).pop();
-      Snack().showSnackBar(
-          context: context, message: 'Product deleted successfully');
-    } else {
-      Navigator.of(context).pop();
-      Navigator.of(context).pop();
-      Snack().showSnackBar(
-          context: context, message: 'Product updated successfully');
     }
   }
 }
