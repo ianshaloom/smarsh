@@ -17,7 +17,7 @@ class ManageUsersPage extends StatefulWidget {
 }
 
 class _ManageUsersPageState extends State<ManageUsersPage>
-    with ManageProductMixin {
+    with ManageUserMixin {
   late final FirebaseCloudUsers _cloudUsers;
 
   @override

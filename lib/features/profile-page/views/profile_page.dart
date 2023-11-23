@@ -30,12 +30,12 @@ class _ProfilePageState extends State<ProfilePage> {
             Navigator.of(context).pop();
           },
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.edit_rounded),
-            onPressed: () {},
-          ),
-        ],
+        // actions: [
+        //   IconButton(
+        //     icon: const Icon(Icons.edit_rounded),
+        //     onPressed: () {},
+        //   ),
+        // ],
       ),
       body: Builder(builder: (context) {
         return Column(

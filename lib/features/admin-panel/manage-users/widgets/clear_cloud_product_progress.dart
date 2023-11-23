@@ -6,11 +6,12 @@ class ClearCloudProductProgress extends StatefulWidget {
   const ClearCloudProductProgress({super.key});
 
   @override
-  State<ClearCloudProductProgress> createState() => _ClearCloudProductProgressState();
+  State<ClearCloudProductProgress> createState() =>
+      _ClearCloudProductProgressState();
 }
 
 class _ClearCloudProductProgressState extends State<ClearCloudProductProgress>
-    with ManageProductMixin {
+    with ManageUserMixin {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<int>(

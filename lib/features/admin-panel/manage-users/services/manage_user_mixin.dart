@@ -8,7 +8,7 @@ import '../../../../services/cloud/cloud_storage_exceptions.dart';
 import '../../../../services/cloud/firebase_cloud_storage.dart';
 import '../widgets/clear_cloud_product_progress.dart';
 
-mixin ManageProductMixin {
+mixin ManageUserMixin {
   Stream<int> clearingPr(BuildContext context) async* {
     List<CloudProduct> products = await FirebaseCloudStorage().getAllStock();
     try {
@@ -63,5 +63,33 @@ mixin ManageProductMixin {
         );
       },
     );
+  }
+
+  // Update User preivileges
+  Future<void> updateUserPrivileges(
+      {required BuildContext context,
+      required String userId,
+      required String role}) async {
+    try {
+      await FirebaseCloudUsers()
+          .updateUserPrivileges(userId: userId, role: role);
+      Snack().showSnackBar(
+          context: context, message: 'User privileges updated successfully');
+    } on CouldNotUpdateException {
+      Snack().showSnackBar(
+          context: context, message: 'Could not update user privileges');
+    }
+  }
+
+  // delete user
+  Future<void> deleteUser(
+      {required BuildContext context, required String userId}) async {
+    try {
+      // await FirebaseCloudUsers().deleteUser(documentId: userId);
+      Snack()
+          .showSnackBar(context: context, message: 'User deleted successfully');
+    } on CouldNotDeleteException {
+      Snack().showSnackBar(context: context, message: 'Could not delete user');
+    }
   }
 }

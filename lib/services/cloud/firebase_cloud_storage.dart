@@ -267,6 +267,20 @@ class FirebaseCloudUsers {
     }
   }
 
+  // update user privileges
+  Future<void> updateUserPrivileges({
+    required String userId,
+    required String role,
+  }) async {
+    try {
+      await users.doc(userId).update({
+        'role': role,
+      });
+    } catch (e) {
+      throw CouldNotUpdateException();
+    }
+  }
+
   // delete user
   Future<void> deleteUser({required String documentId}) async {
     try {
