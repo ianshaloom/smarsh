@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
 
-import '../services/manage_user_mixin.dart';
+import '../services/processed_data_mixin.dart';
 
-class ClearCloudProductProgress extends StatefulWidget {
-  const ClearCloudProductProgress({super.key});
+class ClearProcessedProgress extends StatefulWidget {
+  const ClearProcessedProgress({super.key});
 
   @override
-  State<ClearCloudProductProgress> createState() =>
-      _ClearCloudProductProgressState();
+  State<ClearProcessedProgress> createState() => _ClearProcessedProgressState();
 }
 
-class _ClearCloudProductProgressState extends State<ClearCloudProductProgress>
-    with ManageUserMixin {
+class _ClearProcessedProgressState extends State<ClearProcessedProgress>
+    with ProcessedDataMixin {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<int>(
-      stream: clearingPr(context),
+      stream: clearingProcessed(context),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.active) {
           if (snapshot.hasData) {

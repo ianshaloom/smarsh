@@ -3,9 +3,9 @@
 import 'package:flutter/material.dart';
 
 import '../../../../global/helpers/snacks.dart';
-import '../../../../services/cloud/cloud_product.dart';
+import '../../../../services/cloud/cloud_entities.dart';
 import '../../../../services/cloud/cloud_storage_exceptions.dart';
-import '../../../../services/cloud/firebase_cloud_storage.dart';
+import '../../../../services/cloud/cloud_storage_services.dart';
 import '../../../../services/hive/models/local_product_model/local_product_model.dart';
 import '../../../../services/hive/service/hive_constants.dart';
 import '../../../../services/hive/service/hive_service.dart';
@@ -22,7 +22,7 @@ mixin NonPostedMixin {
     for (var e in non) {
       for (var element in stock) {
         if (element.documentId == e.id) {
-          double t = element.buyingPrice * e.nonPosted;
+          double t = element.retail * e.nonPosted;
           total += t;
         }
       }
@@ -33,16 +33,16 @@ mixin NonPostedMixin {
   Stream<int> refreshingPr() async* {
     await HiveLocalProduct().deleteAllProducts();
 
-    List<CloudProduct> cloudProducts =
-        await FirebaseCloudStorage().getAllStock();
+    List<CloudProduct> cloudProducts = await FirestoreProducts().getAllStock();
 
     for (var e in cloudProducts) {
       final localProduct = LocalProduct(
         productName: e.productName,
-        buyingPrice: e.buyingPrice,
-        sellingPrice: e.sellingPrice,
-        stockCount: e.stockCount,
+        retail: e.buyingPrice,
+        wholesale: e.sellingPrice,
+        lastCount: e.stockCount,
         documentId: e.documentId,
+        todaysCount: e.totalCount,
       );
 
       await HiveLocalProduct().addProduct(localProduct);
@@ -71,7 +71,6 @@ mixin NonPostedMixin {
   }
 
   Stream<int> clearingNp(BuildContext context) async* {
-
     try {
       List<CloudNonPost> nonposted =
           await AdminNonPostRemoteDataSrc().getAllNonPosted();

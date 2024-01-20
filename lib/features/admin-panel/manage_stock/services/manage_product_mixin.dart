@@ -3,19 +3,18 @@
 import 'package:flutter/material.dart';
 
 import '../../../../global/helpers/snacks.dart';
-import '../../../../services/cloud/cloud_product.dart';
+import '../../../../services/cloud/cloud_entities.dart';
 import '../../../../services/cloud/cloud_storage_exceptions.dart';
-import '../../../../services/cloud/firebase_cloud_storage.dart';
+import '../../../../services/cloud/cloud_storage_services.dart';
 import '../widgets/clear_cloud_product_progress.dart';
 
 mixin ManageProductMixin {
   Stream<int> clearingPr(BuildContext context) async* {
-    List<CloudProduct> products = await FirebaseCloudStorage().getAllStock();
+    List<CloudProduct> products = await FirestoreProducts().getAllStock();
     try {
       for (int i = 0; i < products.length; i++) {
         final CloudProduct product = products[i];
-        await FirebaseCloudStorage()
-            .deleteProduct(documentId: product.documentId);
+        await FirestoreProducts().deleteProduct(documentId: product.documentId);
 
         // pop context on last iteration
         yield ((i / products.length) * 100).round();

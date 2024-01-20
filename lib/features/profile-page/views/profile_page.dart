@@ -1,17 +1,19 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../../../constants/constants.dart';
 import '../../../global/helpers/snacks.dart';
 import '../../2-Authentification/2-authentification/services/auth_service.dart';
 import '../../2-Authentification/2-authentification/services/auth_user.dart';
 import '../../2-Authentification/3-google-auth/services/google_service.dart';
-import '../../../services/cloud/cloud_product.dart';
-import '../widgets/check_new_update.dart';
+import '../../../services/cloud/cloud_entities.dart';
+import '../../4-home-page/provider/homepage_provider.dart';
+import '../services/profile_service.dart';
 
 class ProfilePage extends StatefulWidget {
-  final CloudUser cloudUser;
-  const ProfilePage({super.key, required this.cloudUser});
+  const ProfilePage({super.key});
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
@@ -19,7 +21,15 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    String avatar = context.watch<ProfileProvida>().avatar;
+    final CloudUser cloudUser = context.read<HomePageProvida>().getUser;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile'),
@@ -30,12 +40,6 @@ class _ProfilePageState extends State<ProfilePage> {
             Navigator.of(context).pop();
           },
         ),
-        // actions: [
-        //   IconButton(
-        //     icon: const Icon(Icons.edit_rounded),
-        //     onPressed: () {},
-        //   ),
-        // ],
       ),
       body: Builder(builder: (context) {
         return Column(
@@ -43,13 +47,18 @@ class _ProfilePageState extends State<ProfilePage> {
           children: [
             Column(
               children: [
-                const SizedBox(height: 5),
+                const SizedBox(height: 20),
                 Container(
                   alignment: Alignment.center,
                   child: CircleAvatar(
-                    backgroundImage:
-                        NetworkImage(widget.cloudUser.url, scale: 1),
-                    radius: 50,
+                    radius: 51.5,
+                    child: CircleAvatar(
+                      backgroundImage: NetworkImage(
+                          avatar == '' ? cloudUser.url : avatar,
+                          scale: 1),
+                      backgroundColor: Theme.of(context).colorScheme.surface,
+                      radius: 50,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -63,7 +72,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
                   title: const Text('Name'),
-                  subtitle: Text(widget.cloudUser.username),
+                  subtitle: Text(cloudUser.username),
                 ),
                 ListTile(
                   leading: const SizedBox(
@@ -75,7 +84,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
                   title: const Text('Email'),
-                  subtitle: Text(widget.cloudUser.email),
+                  subtitle: Text(cloudUser.email),
                 ),
                 ListTile(
                   leading: const SizedBox(
@@ -87,37 +96,48 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
                   title: const Text('User Role'),
-                  subtitle: Text(widget.cloudUser.role),
+                  subtitle: Text(cloudUser.role),
                 ),
-                // change password button
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: FilledButton.tonal(
-                    onPressed: () {},
-                    style: FilledButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                const SizedBox(height: 30),
+                Column(
+                  children: [
+                    // const Divider(),
+                    const SizedBox(height: 10),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      child: Text(
+                        'Select Avatar',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                      minimumSize: const Size.fromHeight(60),
                     ),
-                    child: const Text('Change Password'),
-                  ),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  child: FilledButton.tonal(
-                    onPressed: () {},
-                    style: FilledButton.styleFrom(
-                      backgroundColor:
-                          Theme.of(context).colorScheme.errorContainer,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      minimumSize: const Size.fromHeight(60),
+                    const SizedBox(height: 30),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ...avatars.map((avatar) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 5),
+                            child: GestureDetector(
+                              onTap: () {
+                                context.read<ProfileProvida>().updateAvatar(
+                                      avatar,
+                                      cloudUser.userId,
+                                    );
+                              },
+                              child: CircleAvatar(
+                                backgroundImage: NetworkImage(avatar, scale: 1),
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.surface,
+                                radius: 30,
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ],
                     ),
-                    child: const Text('Delete Account'),
-                  ),
+                  ],
                 ),
               ],
             ),
@@ -129,7 +149,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   child: FilledButton(
                     onPressed: () {
-                      _logOutDialog(context);
+                      _logOutDialog(context, cloudUser);
                     },
                     style: FilledButton.styleFrom(
                       shape: RoundedRectangleBorder(
@@ -140,15 +160,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     child: const Text('Sign Out'),
                   ),
                 ),
-                TextButton(
-                  onPressed: () {
-                    _checkNewUpdateDialog();
-                  },
-                  child: const Text(
-                    'Check for Updates',
-                    style: TextStyle(fontSize: 12),
-                  ),
-                )
               ],
             )
 
@@ -159,7 +170,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  void _logOutDialog(BuildContext cxt) async {
+  void _logOutDialog(BuildContext cxt, CloudUser cloudUser) async {
     final bool confirm = await showDialog(
       context: cxt,
       builder: (context) {
@@ -185,21 +196,12 @@ class _ProfilePageState extends State<ProfilePage> {
     );
 
     if (confirm) {
-      await _logOut();
+      await _logOut(cloudUser);
     }
   }
 
-  void _checkNewUpdateDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return const UpdateWidgetDialog();
-      },
-    );
-  }
-
-  Future<void> _logOut() async {
-    if (widget.cloudUser.signInProvider == 'google') {
+  Future<void> _logOut(CloudUser cloudUser) async {
+    if (cloudUser.signInProvider == 'google') {
       await GoogleService.google().logOut();
       await AuthService.firebase().logOut();
     } else {

@@ -1,20 +1,19 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
+import '../../../../global/helpers/snacks.dart';
+import '../../../../services/hive/models/local_product_model/local_product_model.dart';
 import '../../../../services/hive/models/processed_stock_model/processed_stock.dart';
 import '../../../../services/hive/service/hive_constants.dart';
-import '../../../../services/cloud/cloud_product.dart';
-import '../../../../services/cloud/firebase_cloud_storage.dart';
 import '../services/processed_data_mixin.dart';
-import '../widgets/prosessed_import_progress.dart';
+import '../widgets/processed_data_bs.dart';
 
 class ProcessedDataPage extends StatelessWidget with ProcessedDataMixin {
   const ProcessedDataPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    List<CloudProduct> newProducts = [];
-    // List<ProcessedData> cloudStock = [];
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -33,8 +32,12 @@ class ProcessedDataPage extends StatelessWidget with ProcessedDataMixin {
             ),
             actions: [
               IconButton(
-                onPressed: () => confirmClearProcessed(context),
-                icon: const Icon(Icons.clear_all),
+                onPressed: () => _moreBottomSheet(
+                  true,
+                  GetMeFromHive.getAllLocalProducts,
+                  context,
+                ),
+                icon: const Icon(CupertinoIcons.ellipsis_vertical),
               ),
             ],
             bottom: PreferredSize(
@@ -64,46 +67,20 @@ class ProcessedDataPage extends StatelessWidget with ProcessedDataMixin {
                     box.values.toList().cast<ProcessedData>();
 
                 return box.isEmpty
-                    ? FutureBuilder(
-                        future: FirebaseCloudStorage().getAllStock(),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.done) {
-                            if (snapshot.hasData) {
-                              List<CloudProduct> cloudStock =
-                                  snapshot.data as List<CloudProduct>;
-
-                              newProducts = cloudStock;
-
-                              return const SliverFillRemaining(
-                                child: Center(
-                                  child: Text(
-                                    'Your product list is empty',
-                                  ),
-                                ),
-                              );
-                            } else {
-                              return const SliverToBoxAdapter(
-                                child: Center(
-                                  child: Text(
-                                    'Your cloud stock list is empty',
-                                    style: TextStyle(
-                                      color: Colors.grey,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }
-                          } else {
-                            return const SliverFillRemaining(
-                              child: Center(
-                                child: CircularProgressIndicator(),
+                    ? const SliverToBoxAdapter(
+                        child: Padding(
+                          padding: EdgeInsets.only(top: 200),
+                          child: Center(
+                            child: Text(
+                              'Imported products will appear here',
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontWeight: FontWeight.w500,
                               ),
-                            );
-                          }
-                        })
+                            ),
+                          ),
+                        ),
+                      )
                     : SliverList.builder(
                         itemCount: imported.length,
                         itemBuilder: (context, index) {
@@ -157,20 +134,28 @@ class ProcessedDataPage extends StatelessWidget with ProcessedDataMixin {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
-          if (HiveBoxes.getProcessedDataBox.isEmpty) {
-            showDialog(
-              barrierColor: Colors.black38,
+          if (HiveBoxes.getProcessedDataBox.isNotEmpty) {
+            Snack().showSnackBar(
               context: context,
-              barrierDismissible: false,
-              builder: (_) => ProcessedImportProgress(products: newProducts),
+              message: 'Clear processed data before importing',
             );
           } else {
-            pleaseClear(context);
+            importPr(context);
           }
         },
         label: const Text('Import products'),
         icon: const Icon(Icons.download),
         //child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  void _moreBottomSheet(
+      bool isAdmin, List<LocalProduct> cloudStock, BuildContext cxt) {
+    showModalBottomSheet(
+      context: cxt,
+      builder: (context) => ProcessedMoreBs(
+        cloudStock: cloudStock,
       ),
     );
   }

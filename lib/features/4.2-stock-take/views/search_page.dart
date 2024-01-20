@@ -3,9 +3,9 @@
 import 'package:flutter/material.dart';
 
 import '../../../global/helpers/snacks.dart';
-import '../../../services/cloud/cloud_product.dart';
+import '../../../services/cloud/cloud_entities.dart';
 import '../../../services/cloud/cloud_storage_exceptions.dart';
-import '../../../services/cloud/firebase_cloud_storage.dart';
+import '../../../services/cloud/cloud_storage_services.dart';
 import '../services/stock_taking_mixin.dart';
 import '../widgets/count_dialog.dart';
 
@@ -107,6 +107,7 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   void _toCountDialog(BuildContext cxt, CloudProduct product) {
+    FocusScope.of(context).unfocus();
     showDialog(
       context: cxt,
       builder: (context) => CountingDialog(product: product),
@@ -116,7 +117,7 @@ class _SearchPageState extends State<SearchPage> {
   void addCount(
       List<dynamic> count, String productCode, BuildContext cxt) async {
     try {
-      await FirebaseCloudStorage()
+      await FirestoreProducts()
           .updateCountListProduct(
             documentId: productCode,
             count: count,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../services/cloud/cloud_product.dart';
+import '../../../../services/cloud/cloud_entities.dart';
 import 'edit_item_textfield.dart';
 
 class EditDialog extends StatelessWidget {

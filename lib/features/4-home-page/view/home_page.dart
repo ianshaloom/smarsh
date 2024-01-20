@@ -1,20 +1,23 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
+
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
 import '../../../constants/svg_constants.dart';
 import '../../../global/providers/smarsh_providers.dart';
+import '../../../services/cloud/cloud_entities.dart';
+import '../../../services/cloud/cloud_storage_services.dart';
 import '../../2-Authentification/2-authentification/services/auth_service.dart';
-import '../../../services/cloud/cloud_product.dart';
-import '../../../services/cloud/firebase_cloud_storage.dart';
 import '../../2-Authentification/constants.dart';
+import '../../4.2-stock-take/views/stock_take_page.dart';
+// import '../../profile-page/services/profile_service.dart';
 import '../../profile-page/views/profile_page.dart';
+import '../provider/homepage_provider.dart';
 import '../service/home_mixin.dart';
 import '../service/home_service.dart';
 import '../widget/homepage_tile.dart';
-import '../../4.2-stock-take/views/stock_take_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -44,14 +47,16 @@ class HomePage extends StatelessWidget {
         },
         child: StreamBuilder(
           initialData: cloudUser,
-          stream: FirebaseCloudUsers().singleUserStream(documentId: uid),
+          stream: FirestoreUsers().singleUserStream(documentId: uid),
           builder: (context, snapshot) {
             //
             if (snapshot.connectionState == ConnectionState.active) {
               //
               if (snapshot.hasData) {
-                //
                 final CloudUser cloudUser = snapshot.data as CloudUser;
+
+                // set user to provider
+                context.read<HomePageProvida>().setUser = cloudUser;
 
                 return CustomScrollView(
                   slivers: [
@@ -72,10 +77,14 @@ class HomePage extends StatelessWidget {
                             Row(
                               children: [
                                 CircleAvatar(
-                                  backgroundImage: NetworkImage(
-                                    cloudUser.url,
+                                  radius: 27,
+                                  child: CircleAvatar(
+                                    backgroundColor: color.surface,
+                                    backgroundImage: NetworkImage(
+                                      cloudUser.url,
+                                    ),
+                                    radius: 25.5,
                                   ),
-                                  radius: 25,
                                 ),
                                 const SizedBox(width: 10),
                                 Text(
@@ -95,7 +104,7 @@ class HomePage extends StatelessWidget {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) =>
-                                        ProfilePage(cloudUser: cloudUser),
+                                        const ProfilePage(),
                                   ),
                                 );
                               },
@@ -275,16 +284,10 @@ class HomePage extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         elevation: 2,
-        //mini: true,
         onPressed: () => _home.navigateToStockList(context),
         // onPressed: () async {
-        //   CloudProduct created = await FirebaseCloudStorage().createProduct(
-        //     documentId: 'C7L0JYO9R9',
-        //     productName: 'CARIBEAN GIN 250ML',
-        //     buyingPrice: 208,
-        //     sellingPrice: 255,
-        //     stockCount: 16,
-        //   );
+        //   final user = context.read<HomePageProvida>().user;
+        //   print(user.username);
         // },
         child: const Icon(
           Icons.view_list_outlined,

@@ -4,6 +4,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../../../firebase_options.dart';
 import '../../auth_exceptions.dart';
+
 import 'google_provider.dart';
 import 'google_user.dart';
 

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../services/hive/models/local_product_model/local_product_model.dart';
 
-
 class StockListTile extends StatelessWidget {
   final LocalProduct product;
   final Function onTap;
@@ -35,13 +34,13 @@ class StockListTile extends StatelessWidget {
           //style: Theme.of(context).textTheme.bodyMedium,
         ),
         subtitle: Text(
-          'Selling: ${product.sellingPrice} •  Buying: ${product.buyingPrice}',
+          'WholeSale: ${product.wholesale} •  Retail: ${product.retail}',
           style: Theme.of(context).textTheme.bodySmall,
         ),
         trailing: Padding(
           padding: const EdgeInsets.only(right: 10),
           child: Text(
-            '${product.stockCount}',
+            '${product.lastCount}',
           ),
         ),
       ),

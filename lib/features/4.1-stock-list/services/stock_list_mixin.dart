@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:to_csv/to_csv.dart' as exportCSV;
 
 import '../../../global/helpers/snacks.dart';
-import '../../../services/cloud/cloud_product.dart';
-import '../../../services/cloud/firebase_cloud_storage.dart';
+import '../../../services/cloud/cloud_entities.dart';
+import '../../../services/cloud/cloud_storage_services.dart';
 import '../../../services/hive/models/local_product_model/local_product_model.dart';
 import '../../../services/hive/service/hive_service.dart';
 
@@ -13,16 +13,16 @@ mixin StockListMixin {
   Stream<int> refreshingPr() async* {
     await HiveLocalProduct().deleteAllProducts();
 
-    List<CloudProduct> cloudProducts =
-        await FirebaseCloudStorage().getAllStock();
+    List<CloudProduct> cloudProducts = await FirestoreProducts().getAllStock();
 
     for (var e in cloudProducts) {
       final localProduct = LocalProduct(
         productName: e.productName,
-        buyingPrice: e.buyingPrice,
-        sellingPrice: e.sellingPrice,
-        stockCount: e.stockCount,
+        retail: e.buyingPrice,
+        wholesale: e.sellingPrice,
+        lastCount: e.stockCount,
         documentId: e.documentId,
+        todaysCount: e.totalCount,
       );
 
       await HiveLocalProduct().addProduct(localProduct);
@@ -30,19 +30,21 @@ mixin StockListMixin {
       yield (cloudProducts.indexOf(e) / cloudProducts.length * 100).round();
     }
   }
-/* -------------------------------------------------------------------------- */
 
-  Future exportToCsv(BuildContext context, List<LocalProduct> prs) async {
+/* -------------------------------------------------------------------------- */
+  Future exportToCsv(BuildContext context) async {
     try {
-      final List<LocalProduct> toBeExported = prs;
+      final List<CloudProduct> cloudProducts =
+          await FirestoreProducts().getAllStock();
 
       // sort by product name
-      toBeExported.sort((a, b) => a.productName.compareTo(b.productName));
+      cloudProducts.sort((a, b) => a.productName.compareTo(b.productName));
 
       List<List<String>> listOfLists = [];
       List<String> data = [];
 
-      for (var e in toBeExported) {
+      for (var e in cloudProducts) {
+        data.add(e.documentId);
         data.add(e.productName);
         data.add(e.buyingPrice.toStringAsFixed(2));
         data.add(e.sellingPrice.toStringAsFixed(2));
@@ -51,16 +53,18 @@ mixin StockListMixin {
         data = [];
       }
 
-      exportCSV.myCSV(_headers, listOfLists);
+      exportCSV.myCSV(headers, listOfLists);
     } on Exception catch (e) {
+      // ignore: use_build_context_synchronously
       Snack().showSnackBar(context: context, message: e.toString());
     }
   }
 }
 
-const List<String> _headers = [
+const List<String> headers = [
+  'Product ID',
   'Product Name',
   'Buying Price',
   'Selling Price',
-  'In Stock',
+  'Quantity',
 ];

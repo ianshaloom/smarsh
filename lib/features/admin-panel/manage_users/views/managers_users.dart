@@ -2,11 +2,10 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../services/cloud/cloud_product.dart';
+import '../../../../services/cloud/cloud_entities.dart';
 import '../../../../services/cloud/cloud_storage_exceptions.dart';
-import '../../../../services/cloud/firebase_cloud_storage.dart';
-import '../services/manage_user_mixin.dart';
-import '../widgets/edit_item_dialog.dart';
+import '../../../../services/cloud/cloud_storage_services.dart';
+import '../services/manage_users_mixin.dart';
 import '../widgets/manage_user_tile.dart';
 
 class ManageUsersPage extends StatefulWidget {
@@ -17,12 +16,12 @@ class ManageUsersPage extends StatefulWidget {
 }
 
 class _ManageUsersPageState extends State<ManageUsersPage>
-    with ManageUserMixin {
-  late final FirebaseCloudUsers _cloudUsers;
+    with ManageUsersMixin {
+  late final FirestoreUsers _cloudUsers;
 
   @override
   void initState() {
-    _cloudUsers = FirebaseCloudUsers();
+    _cloudUsers = FirestoreUsers();
     super.initState();
   }
 
@@ -31,7 +30,7 @@ class _ManageUsersPageState extends State<ManageUsersPage>
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          SliverAppBar(
+          SliverAppBar.medium(
             backgroundColor: Theme.of(context).colorScheme.surface,
             title: const Text('Manage Users'),
             centerTitle: true,
@@ -51,16 +50,14 @@ class _ManageUsersPageState extends State<ManageUsersPage>
                 future: _cloudUsers.getAllUsers(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.done) {
-                    print('========> Connection state done');
                     if (snapshot.hasData) {
-                      print('========> ${snapshot.data}');
                       List<CloudUser> users = snapshot.data as List<CloudUser>;
                       users.sort((a, b) => a.username.compareTo(b.username));
 
                       return SliverList.builder(
                         itemCount: users.length,
                         itemBuilder: (context, index) {
-                          return ManageStockTile(
+                          return ManageUsersTile(
                             user: users[index],
                             onTap: _onTap,
                           );
@@ -108,7 +105,7 @@ class _ManageUsersPageState extends State<ManageUsersPage>
                 title: const Text('Edit'),
                 onTap: () {
                   Navigator.of(context).pop();
-                  _editDialog(context, product);
+                  // _editDialog(context, product);
                 },
               ),
               ListTile(
@@ -131,8 +128,8 @@ class _ManageUsersPageState extends State<ManageUsersPage>
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => WillPopScope(
-          onWillPop: () async => false,
+        builder: (context) => PopScope(
+          canPop: false,
           child: Dialog(
             child: Container(
               padding: const EdgeInsets.all(16.0),
@@ -151,54 +148,6 @@ class _ManageUsersPageState extends State<ManageUsersPage>
       await _cloudUsers.deleteUser(documentId: model.documentId);
     } catch (e) {
       throw CouldNotDeleteException;
-    }
-  }
-
-  // NOTE: Edit Dialog Members
-
-  void _editDialog(
-    BuildContext cxt,
-    CloudProduct model,
-  ) {
-    showDialog(
-      context: cxt,
-      builder: (context) => EditDialog(model: model, onEdit: _editProduct),
-    );
-  }
-
-  void _editProduct(CloudUser model) async {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => WillPopScope(
-        onWillPop: () async => false,
-        child: Dialog(
-          child: Container(
-            padding: const EdgeInsets.all(16.0),
-            child: const Row(
-              children: [
-                CircularProgressIndicator(),
-                SizedBox(width: 16.0),
-                Text('Updating Product...'),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-
-    try {
-      await _cloudUsers.updateUser(
-        userId: model.userId,
-        username: model.username,
-        email: model.email,
-        role: model.role,
-        url: model.url,
-        provider: model.signInProvider,
-        color: model.color,
-      );
-    } catch (e) {
-      throw CouldNotUpdateException;
     }
   }
 }

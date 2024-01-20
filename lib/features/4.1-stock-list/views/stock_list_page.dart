@@ -20,7 +20,7 @@ class StockListPage extends StatefulWidget {
 
 class _StockListPageState extends State<StockListPage> with StockListMixin {
   final _searchController = TextEditingController();
-  final List<LocalProduct> products = GetMeFromHive.getAllLocalProducts;
+  List<LocalProduct> products = GetMeFromHive.getAllLocalProducts;
   List _searched = [];
 
   void _searchProduct(String query) {
@@ -75,10 +75,24 @@ class _StockListPageState extends State<StockListPage> with StockListMixin {
         ),
         actions: [
           IconButton(
-            onPressed: () async {
-              exportToCsv(context, products);
+            icon: const Icon(CupertinoIcons.cloud_download),
+            onPressed: () {
+              exportToCsv(context);
             },
-            icon: const Icon(Icons.cloud_download_rounded),
+          ),
+          IconButton(
+            onPressed: () async {
+              await showDialog(
+                barrierColor: Colors.black38,
+                context: context,
+                barrierDismissible: false,
+                builder: (_) => const RefreshLocalSrc(),
+              ).then((value) => setState(() {
+                    products = GetMeFromHive.getAllLocalProducts;
+                    _searched = products;
+                  }));
+            },
+            icon: const Icon(CupertinoIcons.refresh),
           ),
         ],
         bottom: PreferredSize(
@@ -128,25 +142,15 @@ class _StockListPageState extends State<StockListPage> with StockListMixin {
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
-        child: RefreshIndicator(
-          onRefresh: () async {
-            await showDialog(
-              barrierColor: Colors.black38,
-              context: context,
-              barrierDismissible: false,
-              builder: (_) => const RefreshLocalSrc(),
-            ).then((value) => setState(() {}));
+        child: ListView.builder(
+          itemCount: _searched.length,
+          itemBuilder: (context, index) {
+            _searched.sort((a, b) => a.productName.compareTo(b.productName));
+            return StockListTile(
+              product: _searched[index],
+              onTap: _drawProductDetailBottomSheet,
+            );
           },
-          child: ListView.builder(
-            itemCount: _searched.length,
-            itemBuilder: (context, index) {
-              _searched.sort((a, b) => a.productName.compareTo(b.productName));
-              return StockListTile(
-                product: _searched[index],
-                onTap: _drawProductDetailBottomSheet,
-              );
-            },
-          ),
         ),
       ),
     );

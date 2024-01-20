@@ -135,8 +135,8 @@ class ForgotPasswordPage extends StatelessWidget {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => WillPopScope(
-        onWillPop: () async => false,
+      builder: (context) => PopScope(
+        canPop: false,
         child: Dialog(
           child: Container(
             padding: const EdgeInsets.all(16.0),

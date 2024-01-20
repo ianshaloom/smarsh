@@ -3,23 +3,20 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../global/providers/smarsh_providers.dart';
-import '../../../services/cloud/cloud_product.dart';
-import '../../../services/cloud/firebase_cloud_storage.dart';
+import '../../../services/cloud/cloud_entities.dart';
+import '../../../services/cloud/cloud_storage_services.dart';
 import '../services/stock_taking_mixin.dart';
 import '../widgets/count_dialog.dart';
-import '../widgets/disable_count_switch.dart';
 import '../widgets/export_final_progress.dart';
+import '../widgets/fetch_processed_progressed.dart';
 import 'search_page.dart';
-
-// SECTION Stock Take Page
-/* -------------------------------------------------------------------------- */
 
 class StockTakePage extends StatelessWidget with StockTakingMixin {
   StockTakePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final cloudStock = FirebaseCloudStorage().allProducts();
+    final cloudStock = FirestoreProducts().allProducts();
     bool isAdmin = context.read<AppProviders>().isAdmin;
 
     return Scaffold(
@@ -56,6 +53,17 @@ class StockTakePage extends StatelessWidget with StockTakingMixin {
                     },
                   ),
                   actions: [
+                    IconButton(
+                      onPressed: () async {
+                        await showDialog(
+                          barrierColor: Colors.black38,
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (_) => const FetchProcessedSrc(),
+                        );
+                      },
+                      icon: const Icon(CupertinoIcons.cloud_download),
+                    ),
                     isAdmin
                         ? IconButton(
                             onPressed: () =>
@@ -108,7 +116,10 @@ class StockTakePage extends StatelessWidget with StockTakingMixin {
 
   void _toCountDialog(BuildContext cxt, CloudProduct product) {
     showDialog(
-        context: cxt, builder: (context) => CountingDialog(product: product));
+      useSafeArea: false,
+      context: cxt,
+      builder: (context) => CountingDialog(product: product),
+    );
   }
 
   void _moreBottomSheet(
@@ -116,13 +127,12 @@ class StockTakePage extends StatelessWidget with StockTakingMixin {
     showModalBottomSheet(
       context: cxt,
       builder: (context) => Container(
-        height: 200,
+        height: 140,
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
         child: Column(
           children: [
-            const DisableStockTake(),
             ListTile(
-              leading: const Icon(Icons.file_download),
+              leading: const Icon(CupertinoIcons.archivebox),
               title: const Text('Export to CSV'),
               onTap: () {
                 if (isAdmin) {
@@ -134,7 +144,7 @@ class StockTakePage extends StatelessWidget with StockTakingMixin {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.file_download),
+              leading: const Icon(CupertinoIcons.archivebox),
               title: const Text('Export to Final Count'),
               onTap: () {
                 if (isAdmin) {
@@ -219,12 +229,6 @@ class StockTakePage extends StatelessWidget with StockTakingMixin {
   }
 }
 
-/* -------------------------------------------------------------------------- */
-// !SECTION Stock Take Page
-
-// NOTE - Stock Take Page Views
-
-// Component: Product Tile
 
 class _CloudProductTile extends StatelessWidget {
   final CloudProduct product;

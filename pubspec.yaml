@@ -44,6 +44,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   hive_generator: null
+  envied_generator:
 
 flutter_launcher_icons:
   android: true

@@ -3,9 +3,9 @@
 import 'package:flutter/material.dart';
 
 import '../../../../global/helpers/snacks.dart';
-import '../../../../services/cloud/cloud_product.dart';
+import '../../../../services/cloud/cloud_entities.dart';
 import '../../../../services/cloud/cloud_storage_exceptions.dart';
-import '../../../../services/cloud/firebase_cloud_storage.dart';
+import '../../../../services/cloud/cloud_storage_services.dart';
 import '../services/manage_product_mixin.dart';
 import '../widgets/edit_item_dialog.dart';
 import '../widgets/manage_stock_tile.dart';
@@ -19,12 +19,12 @@ class ManageProductPage extends StatefulWidget {
 
 class _ManageProductPageState extends State<ManageProductPage>
     with ManageProductMixin {
-  Future<List<CloudProduct>> _cloudStock = FirebaseCloudStorage().getAllStock();
-  late final FirebaseCloudStorage _cloudStorage;
+  Future<List<CloudProduct>> _cloudStock = FirestoreProducts().getAllStock();
+  late final FirestoreProducts _cloudStorage;
 
   @override
   void initState() {
-    _cloudStorage = FirebaseCloudStorage();
+    _cloudStorage = FirestoreProducts();
     super.initState();
   }
 
@@ -86,16 +86,6 @@ class _ManageProductPageState extends State<ManageProductPage>
                       prs = cloudStock;
                       cloudStock.sort(
                           (a, b) => a.productName.compareTo(b.productName));
-
-                      if (cloudStock.isEmpty) {
-                        return const SliverFillRemaining(
-                          child: Center(
-                            child: Text(
-                              'Your stock list is empty',
-                            ),
-                          ),
-                        );
-                      }
 
                       return SliverList.builder(
                         itemCount: cloudStock.length,
@@ -177,8 +167,8 @@ class _ManageProductPageState extends State<ManageProductPage>
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => WillPopScope(
-          onWillPop: () async => false,
+        builder: (context) => PopScope(
+          canPop: false,
           child: Dialog(
             child: Container(
               padding: const EdgeInsets.all(16.0),
@@ -221,8 +211,8 @@ class _ManageProductPageState extends State<ManageProductPage>
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => WillPopScope(
-        onWillPop: () async => false,
+      builder: (context) => PopScope(
+        canPop: false,
         child: Dialog(
           child: Container(
             padding: const EdgeInsets.all(16.0),

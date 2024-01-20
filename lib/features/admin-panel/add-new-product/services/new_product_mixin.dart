@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../../../../services/cloud/cloud_product.dart';
+import '../../../../services/cloud/cloud_entities.dart';
 import '../../../../services/cloud/cloud_storage_exceptions.dart';
-import '../../../../services/cloud/firebase_cloud_storage.dart';
+import '../../../../services/cloud/cloud_storage_services.dart';
 
 mixin NewProductMixin {
-  final FirebaseCloudStorage _cloudStorage = FirebaseCloudStorage();
+  final FirestoreProducts _cloudStorage = FirestoreProducts();
 
   Future<CloudProduct> createProduct(
       CloudProduct product, BuildContext cxt) async {
@@ -14,8 +14,8 @@ mixin NewProductMixin {
       showDialog(
         context: cxt,
         barrierDismissible: false,
-        builder: (context) => WillPopScope(
-          onWillPop: () async => false,
+        builder: (context) => PopScope(
+          canPop:  false,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -42,8 +42,8 @@ mixin NewProductMixin {
       CloudProduct created = await _cloudStorage.createProduct(
         documentId: product.documentId,
         productName: product.productName,
-        buyingPrice: product.buyingPrice,
-        sellingPrice: product.sellingPrice,
+        retailPrice: product.buyingPrice,
+        wholesalePrice: product.sellingPrice,
         stockCount: product.stockCount,
       );
 

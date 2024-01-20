@@ -1,11 +1,13 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
+
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../global/helpers/snacks.dart';
+import '../../../../services/cloud/cloud_entities.dart';
 import '../../../../services/cloud/cloud_storage_exceptions.dart';
-import '../../../../services/cloud/firebase_cloud_storage.dart';
+import '../../../../services/cloud/cloud_storage_services.dart';
 import '../../auth_exceptions.dart';
 import '../services/google_service.dart';
 import '../services/google_user.dart';
@@ -92,10 +94,10 @@ class _GoSignInWidgetState extends State<GoSignInWidget> {
     final String giD = googleUser!.id;
 
     try {
-      final cloudUser = await FirebaseCloudUsers().singleUser(documentId: giD);
+      final cloudUser = await FirestoreUsers().singleUser(documentId: giD);
 
-      if (cloudUser == null) {
-        await FirebaseCloudUsers().createUser(
+      if (cloudUser == CloudUser.empty) {
+        await FirestoreUsers().createUser(
           userId: giD,
           username: googleUser.name,
           email: googleUser.email,
@@ -105,7 +107,7 @@ class _GoSignInWidgetState extends State<GoSignInWidget> {
           color: 'green',
         );
       } else if (cloudUser.signInProvider != 'google') {
-        await FirebaseCloudUsers().updateUser(
+        await FirestoreUsers().updateUser(
           userId: giD,
           username: googleUser.name,
           email: googleUser.email,

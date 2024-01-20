@@ -2,7 +2,6 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 part 'local_product_model.g.dart';
 
-
 @HiveType(typeId: 2)
 class LocalProduct extends HiveObject {
   @HiveField(0)
@@ -12,20 +11,24 @@ class LocalProduct extends HiveObject {
   final String productName;
 
   @HiveField(2)
-  final double buyingPrice;
+  final double retail;
 
   @HiveField(3)
-  final double sellingPrice;
+  final double wholesale;
 
   @HiveField(4)
-  final int stockCount;
+  final int lastCount;
+
+  @HiveField(5)
+  final int todaysCount;
 
   // required constructor
   LocalProduct({
     required this.documentId,
     required this.productName,
-    required this.buyingPrice,
-    required this.sellingPrice,
-    required this.stockCount,
+    required this.retail,
+    required this.wholesale,
+    required this.lastCount,
+    required this.todaysCount,
   });
 }

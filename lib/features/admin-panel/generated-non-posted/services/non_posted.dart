@@ -49,7 +49,7 @@ class NonPosted {
     for (var e in nonPost) {
       for (var element in stock) {
         if (element.documentId == e.id) {
-          double t = element.buyingPrice * e.nonPosted;
+          double t = element.retail * e.nonPosted;
           total += t;
         }
       }
@@ -84,7 +84,7 @@ class NonPosted {
         name: name,
         expectedCount: expectedCount,
         recentCount: recentCount,
-        sellingsPrice: e.sellingPrice,
+        sellingsPrice: e.wholesale,
       );
 
       nonPostItems.add(i);

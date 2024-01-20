@@ -1,29 +1,20 @@
 import 'package:flutter/material.dart';
 
-import '../../../../global/helpers/snacks.dart';
-import '../../../../services/cloud/cloud_product.dart';
-import '../services/processed_data_mixin.dart';
+import '../services/stock_taking_mixin.dart';
 
-class ProcessedImportProgress extends StatefulWidget {
-  final List<CloudProduct> products;
-  const ProcessedImportProgress({super.key, required this.products});
+class FetchProcessedSrc extends StatefulWidget {
+  const FetchProcessedSrc({super.key});
 
   @override
-  State<ProcessedImportProgress> createState() =>
-      _ProcessedImportProgressState();
+  State<FetchProcessedSrc> createState() => _FetchProcessedSrcState();
 }
 
-class _ProcessedImportProgressState extends State<ProcessedImportProgress>
-    with ProcessedDataMixin {
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
+class _FetchProcessedSrcState extends State<FetchProcessedSrc>
+    with StockTakingMixin {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<int>(
-      stream: importingPr(widget.products, context),
+      stream: fetchingPr(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.active) {
           if (snapshot.hasData) {
@@ -43,37 +34,10 @@ class _ProcessedImportProgressState extends State<ProcessedImportProgress>
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  'Uploading...',
+                  'Refreshing...',
                   style: Theme.of(context).textTheme.titleSmall!.copyWith(
                         color: Theme.of(context).colorScheme.inversePrimary,
                       ),
-                ),
-              ],
-            );
-          } else if (snapshot.hasError) {
-            Snack().showSnackBar(
-                context: context, message: 'Error importing processed data');
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SizedBox(
-                  height: 75,
-                  width: 75,
-                  child: Icon(
-                    Icons.error,
-                    size: 65,
-                    color: Theme.of(context).colorScheme.error,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                TextButton.icon(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  icon: const Icon(Icons.clear),
-                  label: const Text(
-                    'Cancel Process',
-                  ),
                 ),
               ],
             );

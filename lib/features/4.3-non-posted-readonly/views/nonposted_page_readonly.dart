@@ -44,6 +44,10 @@ class _NonPostedListPageState extends State<NonPostedListPage>
               final nonPost = snapshot.data as List<CloudNonPosted>;
               non = nonPost;
 
+              if (nonPost.isEmpty) {
+                return _emptySkeleton(context);
+              }
+
               return CustomScrollView(
                 slivers: [
                   SliverAppBar.medium(
@@ -141,32 +145,7 @@ class _NonPostedListPageState extends State<NonPostedListPage>
                 ],
               );
             } else {
-              return CustomScrollView(
-                slivers: [
-                  SliverAppBar.medium(
-                    backgroundColor: Theme.of(context).colorScheme.surface,
-                    title: const Text('Non Posted Sales'),
-                    centerTitle: true,
-                    elevation: 0,
-                    scrolledUnderElevation: 0,
-                    titleTextStyle:
-                        Theme.of(context).textTheme.titleLarge!.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                    leading: IconButton(
-                      icon: const Icon(Icons.arrow_back_ios),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                  ),
-                  const SliverFillRemaining(
-                    child: Center(
-                      child: Text('No Data'),
-                    ),
-                  ),
-                ],
-              );
+              return _emptySkeleton(context);
             }
           } else {
             return CustomScrollView(
@@ -217,7 +196,7 @@ class _NonPostedListPageState extends State<NonPostedListPage>
         },
       ),
       floatingActionButton: FloatingActionButton.small(
-        onPressed: () => filterBottomSheet(context),
+        onPressed: () => non.isEmpty ? null : filterBottomSheet(context),
         child: const Icon(Icons.filter_alt_outlined),
       ),
     );
@@ -256,5 +235,33 @@ class _NonPostedListPageState extends State<NonPostedListPage>
         });
         break;
     }
+  }
+
+  Widget _emptySkeleton(BuildContext context) {
+    return CustomScrollView(
+      slivers: [
+        SliverAppBar(
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          title: const Text('Non Posted Sales'),
+          centerTitle: true,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          titleTextStyle: Theme.of(context).textTheme.titleLarge!.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ),
+        const SliverFillRemaining(
+          child: Center(
+            child: Text('Non posted sales list is empty'),
+          ),
+        ),
+      ],
+    );
   }
 }

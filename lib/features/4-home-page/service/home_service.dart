@@ -3,8 +3,8 @@ import 'package:flutter/widgets.dart';
 import '../../../services/hive/models/local_product_model/local_product_model.dart';
 import '../../../services/hive/service/hive_constants.dart';
 import '../../../global/helpers/snacks.dart';
-import '../../../services/cloud/cloud_product.dart';
-import '../../../services/cloud/firebase_cloud_storage.dart';
+import '../../../services/cloud/cloud_entities.dart';
+import '../../../services/cloud/cloud_storage_services.dart';
 import '../../../services/hive/service/hive_service.dart';
 
 class NonPostLocalDataSrcRd {
@@ -22,15 +22,16 @@ class NonPostLocalDataSrcRd {
       if (GetMeFromHive.getAllLocalProducts.isEmpty && !refresh) {
         List<CloudProduct> cproducts = [];
         List<LocalProduct> lproducts = [];
-        cproducts = await FirebaseCloudStorage().getAllStock();
+        cproducts = await FirestoreProducts().getAllStock();
 
         for (var pr in cproducts) {
           final localProduct = LocalProduct(
             productName: pr.productName,
-            buyingPrice: pr.buyingPrice,
-            sellingPrice: pr.sellingPrice,
-            stockCount: pr.stockCount,
+            retail: pr.buyingPrice,
+            wholesale: pr.sellingPrice,
+            lastCount: pr.stockCount,
             documentId: pr.documentId,
+            todaysCount: pr.totalCount,
           );
 
           lproducts.add(localProduct);
@@ -47,15 +48,16 @@ class NonPostLocalDataSrcRd {
 
         List<CloudProduct> cproducts = [];
         List<LocalProduct> lproducts = [];
-        cproducts = await FirebaseCloudStorage().getAllStock();
+        cproducts = await FirestoreProducts().getAllStock();
 
         for (var pr in cproducts) {
           final localProduct = LocalProduct(
             productName: pr.productName,
-            buyingPrice: pr.buyingPrice,
-            sellingPrice: pr.sellingPrice,
-            stockCount: pr.stockCount,
+            retail: pr.buyingPrice,
+            wholesale: pr.sellingPrice,
+            lastCount: pr.stockCount,
             documentId: pr.documentId,
+            todaysCount: pr.totalCount,
           );
 
           lproducts.add(localProduct);
@@ -78,4 +80,6 @@ class NonPostLocalDataSrcRd {
       return [];
     }
   }
+
+  
 }

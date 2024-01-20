@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../global/helpers/snacks.dart';
 import '../../../../global/utils/shared_classes.dart';
 import '../../../../global/helpers/custom_widgets.dart';
-import '../../../../services/cloud/cloud_product.dart';
+import '../../../../services/cloud/cloud_entities.dart';
 import '../services/new_product_mixin.dart';
 
 // SECTION Add New Product Page

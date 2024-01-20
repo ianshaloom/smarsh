@@ -1,24 +1,24 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'cloud_product.dart';
+import 'cloud_entities.dart';
 import 'cloud_storage_exceptions.dart';
 
-class FirebaseCloudStorage {
-  final stock = FirebaseFirestore.instance.collection('stock');
+class FirestoreProducts {
+  final stock = FirebaseFirestore.instance.collection('smarsh-stock');
 
   Future<CloudProduct> createProduct({
     required String documentId,
     required String productName,
-    required double buyingPrice,
-    required double sellingPrice,
+    required double retailPrice,
+    required double wholesalePrice,
     required int stockCount,
   }) async {
     String customDocumentId = documentId;
     final document = {
       'productId': customDocumentId,
       'productName': productName,
-      'buyingPrice': buyingPrice,
-      'sellingPrice': sellingPrice,
+      'buyingPrice': retailPrice,
+      'sellingPrice': wholesalePrice,
       'stockCount': stockCount,
       'count': [],
     };
@@ -183,16 +183,15 @@ class FirebaseCloudStorage {
     }
   }
 
-  FirebaseCloudStorage._sharedInstance();
-  static final FirebaseCloudStorage _shared =
-      FirebaseCloudStorage._sharedInstance();
-  factory FirebaseCloudStorage() => _shared;
+  FirestoreProducts._sharedInstance();
+  static final FirestoreProducts _shared = FirestoreProducts._sharedInstance();
+  factory FirestoreProducts() => _shared;
 }
 
 // Same as above, but for CloudUsers
 
-class FirebaseCloudUsers {
-  final users = FirebaseFirestore.instance.collection('users');
+class FirestoreUsers {
+  final users = FirebaseFirestore.instance.collection('smarsh-users');
 
   Future<CloudUser> createUser({
     required String userId,
@@ -281,6 +280,38 @@ class FirebaseCloudUsers {
     }
   }
 
+  // update user avatar url
+  Future<String> updateUserAvatarUrl({
+    required String userId,
+    required String url,
+  }) async {
+    try {
+      await users.doc(userId).update({
+        'url': url,
+      });
+
+      return url;
+    } catch (e) {
+      throw CouldNotUpdateException();
+    }
+  }
+
+  // update user color
+  Future<String> updateUserColor({
+    required String userId,
+    required String color,
+  }) async {
+    try {
+      await users.doc(userId).update({
+        'color': color,
+      });
+
+      return color;
+    } catch (e) {
+      throw CouldNotUpdateException();
+    }
+  }
+
   // delete user
   Future<void> deleteUser({required String documentId}) async {
     try {
@@ -301,14 +332,14 @@ class FirebaseCloudUsers {
   Future<List<CloudUser>> getAllUsers() async {
     final snapShot = await users.get();
     final fetchedUsers = snapShot.docs
-        .map((doc) => CloudUser.fromDocSnapshot(documentSnapshot: doc))
+        .map((doc) => CloudUser.fromQuerySnapshot(documentSnapshot: doc))
         .toList();
 
     return fetchedUsers;
   }
 
   // get a future of a single user by id fromdocsnapshot
-  Future<CloudUser?> singleUser({required String documentId}) async {
+  Future<CloudUser> singleUser({required String documentId}) async {
     try {
       final fetchedUser = await users.doc(documentId).get();
 
@@ -323,7 +354,7 @@ class FirebaseCloudUsers {
           color: fetchedUser['color'],
         );
       } else {
-        return null;
+        return CloudUser.empty; 
       }
     } catch (e) {
       throw GenericCloudException();
@@ -338,9 +369,59 @@ class FirebaseCloudUsers {
         .map((event) => CloudUser.fromDocSnapshot(documentSnapshot: event));
   }
 
-  FirebaseCloudUsers._sharedInstance();
+  FirestoreUsers._sharedInstance();
 
-  static final FirebaseCloudUsers _shared =
-      FirebaseCloudUsers._sharedInstance();
-  factory FirebaseCloudUsers() => _shared;
+  static final FirestoreUsers _shared = FirestoreUsers._sharedInstance();
+  factory FirestoreUsers() => _shared;
+}
+
+// Same as above, but for CloudProcessed
+
+class FirestoreProcessed {
+  final processed =
+      FirebaseFirestore.instance.collection('smarsh-processed-data');
+
+  Future<CloudProcessed> createProcessed({
+    required String documentId,
+    required String productName,
+    required int expectedCount,
+  }) async {
+    String customDocumentId = documentId;
+    final document = {
+      'documentId': customDocumentId,
+      'productName': productName,
+      'expectedCount': expectedCount,
+    };
+
+    try {
+      processed.doc(customDocumentId).set(document);
+      final fetchedProcessed = await processed.doc(customDocumentId).get();
+
+      return CloudProcessed(
+        documentId: fetchedProcessed.id,
+        productName: fetchedProcessed['productName'],
+        expectedCount: fetchedProcessed['expectedCount'],
+      );
+    } catch (e) {
+      throw CouldNotCreateException();
+    }
+  }
+
+  // delete processed
+  Future<void> deleteProcessed({required String documentId}) async {
+    try {
+      await processed.doc(documentId).delete();
+    } catch (e) {
+      throw CouldNotDeleteException();
+    }
+  }
+
+  Future<List<CloudProcessed>> getAllProcessed() async {
+    final snapShot = await processed.get();
+    final fetchedProcessed = snapShot.docs
+        .map((doc) => CloudProcessed.fromQuerySnapshot(documentSnapshot: doc))
+        .toList();
+
+    return fetchedProcessed;
+  }
 }

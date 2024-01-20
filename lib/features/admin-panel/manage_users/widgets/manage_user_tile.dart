@@ -2,15 +2,15 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../services/cloud/cloud_product.dart';
-import '../services/manage_user_mixin.dart';
+import '../../../../services/cloud/cloud_entities.dart';
+import '../services/manage_users_mixin.dart';
 import 'role_segmented_button.dart';
 
-class ManageStockTile extends StatelessWidget with ManageUserMixin {
+class ManageUsersTile extends StatelessWidget with ManageUsersMixin {
   final CloudUser user;
   final Function onTap;
 
-  const ManageStockTile({super.key, required this.user, required this.onTap});
+  const ManageUsersTile({super.key, required this.user, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -25,9 +25,13 @@ class ManageStockTile extends StatelessWidget with ManageUserMixin {
             children: [
               Row(
                 children: [
-                  Image(
-                    image: NetworkImage(
-                      user.url,
+                  SizedBox(
+                    height: 85,
+                    width: 85,
+                    child: Image(
+                      image: NetworkImage(
+                        user.url,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -38,7 +42,7 @@ class ManageStockTile extends StatelessWidget with ManageUserMixin {
                       Text(
                         user.username,
                         style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                            fontWeight: FontWeight.w600, fontSize: 19),
+                            fontWeight: FontWeight.w600, fontSize: 17),
                       ),
                       Text(
                         user.email,
@@ -56,6 +60,7 @@ class ManageStockTile extends StatelessWidget with ManageUserMixin {
                         style:
                             Theme.of(context).textTheme.titleMedium!.copyWith(
                                   fontWeight: FontWeight.w400,
+                                  fontSize: 14,
                                 ),
                       ),
                     ],

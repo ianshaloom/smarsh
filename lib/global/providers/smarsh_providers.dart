@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../features/2-Authentification/2-authentification/services/auth_service.dart';
 import '../../features/2-Authentification/constants.dart';
-import '../../services/cloud/cloud_product.dart';
-import '../../services/cloud/firebase_cloud_storage.dart';
+import '../../services/cloud/cloud_entities.dart';
+import '../../services/cloud/cloud_storage_services.dart';
 
 class AppProviders with ChangeNotifier {
   bool _isAdmin = false;
@@ -26,10 +26,10 @@ class AppProviders with ChangeNotifier {
   }
 
   Future toggleAdmin() async {
-    final user = await FirebaseCloudUsers()
+    final user = await FirestoreUsers()
         .singleUser(documentId: AppService.firebase().currentUser!.id);
 
-    if (user == null) {
+    if (user == CloudUser.empty ) {
       _isAdmin = false;
     } else {
       _userr = user;

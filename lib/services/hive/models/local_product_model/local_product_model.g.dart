@@ -19,26 +19,29 @@ class LocalProductAdapter extends TypeAdapter<LocalProduct> {
     return LocalProduct(
       documentId: fields[0] as String,
       productName: fields[1] as String,
-      buyingPrice: fields[2] as double,
-      sellingPrice: fields[3] as double,
-      stockCount: fields[4] as int,
+      retail: fields[2] as double,
+      wholesale: fields[3] as double,
+      lastCount: fields[4] as int,
+      todaysCount: fields[5] as int,
     );
   }
 
   @override
   void write(BinaryWriter writer, LocalProduct obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.documentId)
       ..writeByte(1)
       ..write(obj.productName)
       ..writeByte(2)
-      ..write(obj.buyingPrice)
+      ..write(obj.retail)
       ..writeByte(3)
-      ..write(obj.sellingPrice)
+      ..write(obj.wholesale)
       ..writeByte(4)
-      ..write(obj.stockCount);
+      ..write(obj.lastCount)
+      ..writeByte(5)
+      ..write(obj.todaysCount);
   }
 
   @override

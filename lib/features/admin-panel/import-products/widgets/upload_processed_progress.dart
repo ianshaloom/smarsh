@@ -1,23 +1,22 @@
 import 'package:flutter/material.dart';
 
 import '../../../../services/hive/models/local_product_model/local_product_model.dart';
-import '../services/processed_data_mixin.dart';
+import '../services/import_product_mixin.dart';
 
-class ProcessedUploadProgress extends StatefulWidget {
+class ProductUploadProgress extends StatefulWidget {
   final List<LocalProduct> locals;
-  const ProcessedUploadProgress({super.key, required this.locals});
+  const ProductUploadProgress({super.key, required this.locals});
 
   @override
-  State<ProcessedUploadProgress> createState() =>
-      _ProcessedUploadProgressState();
+  State<ProductUploadProgress> createState() => _ProductUploadProgressState();
 }
 
-class _ProcessedUploadProgressState extends State<ProcessedUploadProgress>
-    with ProcessedDataMixin {
+class _ProductUploadProgressState extends State<ProductUploadProgress>
+    with ImportProcessedMixin {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<int>(
-      stream: stream,
+      stream: uploadingPr(widget.locals, context),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.active) {
           if (snapshot.hasData) {

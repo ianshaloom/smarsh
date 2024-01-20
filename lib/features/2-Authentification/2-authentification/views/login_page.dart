@@ -2,16 +2,18 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../services/cloud/cloud_storage_exceptions.dart';
-import '../../../../services/cloud/firebase_cloud_storage.dart';
-import '../../3-google-auth/widgets/google_signin.dart';
 import '../../../../global/helpers/snacks.dart';
+import '../../../../services/cloud/cloud_entities.dart';
+import '../../../../services/cloud/cloud_storage_exceptions.dart';
+import '../../../../services/cloud/cloud_storage_services.dart';
+import '../../3-google-auth/widgets/google_signin.dart';
 import '../../auth_exceptions.dart';
 import '../../constants.dart';
 import '../../model/auth_user_entity.dart';
 import '../provider/auth_provider.dart';
-import 'forgot_password_page.dart';
 import '../widgets/auth_widgets.dart';
+
+import 'forgot_password_page.dart';
 
 //SECTION: Login Page
 /* -------------------------------------------------------------------------- */
@@ -204,10 +206,10 @@ class SignInPage extends StatelessWidget {
     BuildContext context,
   ) async {
     try {
-      final cloudUser = await FirebaseCloudUsers().singleUser(documentId: uid);
+      final cloudUser = await FirestoreUsers().singleUser(documentId: uid);
 
-      if (cloudUser == null) {
-        await FirebaseCloudUsers().createUser(
+      if (cloudUser == CloudUser.empty) {
+        await FirestoreUsers().createUser(
           userId: uid,
           username: username,
           email: email,
@@ -217,7 +219,7 @@ class SignInPage extends StatelessWidget {
           color: 'green',
         );
       } else if (cloudUser.signInProvider != 'email&pass') {
-        await FirebaseCloudUsers().updateUser(
+        await FirestoreUsers().updateUser(
           userId: uid,
           username: username,
           email: email,

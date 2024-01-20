@@ -13,8 +13,8 @@ void main() async {
 
   // Set preferred orientations
   SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp, // Portrait mode with the device upright
-    DeviceOrientation.portraitDown, // Portrait mode with the device upside down
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
   ]);
 
   await AppService.firebase().initialize();

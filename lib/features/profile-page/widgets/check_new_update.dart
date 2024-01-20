@@ -128,8 +128,8 @@ class UpdateWidgetDialog extends StatelessWidget {
 
   Future<bool> get _check async {
     await Future.delayed(const Duration(seconds: 2), () {
-      return false;
+      return true;
     });
-    return false;
+    return true;
   }
 }

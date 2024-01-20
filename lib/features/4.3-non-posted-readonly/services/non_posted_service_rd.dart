@@ -4,7 +4,7 @@ import '../../../services/cloud/cloud_storage_exceptions.dart';
 import '../entities/cloud_nonposted.dart';
 
 class NonPostRemoteDataSrcRd {
-  final nonposted = FirebaseFirestore.instance.collection('non-posted');
+  final nonposted = FirebaseFirestore.instance.collection('smarsh-non-posted');
 
   // update nonposted item
   Future updateNonPosted({
@@ -21,7 +21,7 @@ class NonPostRemoteDataSrcRd {
       throw CouldNotUpdateException();
     }
   }
-  
+
   // return a stream of type list of cloud nonposted
   Stream<List<CloudNonPosted>> excessStream() {
     return nonposted.snapshots().map((snapshot) {

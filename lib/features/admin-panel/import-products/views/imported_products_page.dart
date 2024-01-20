@@ -3,24 +3,22 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 import '../../../../services/hive/models/local_product_model/local_product_model.dart';
 import '../../../../services/hive/service/hive_constants.dart';
-import '../../../../services/cloud/cloud_product.dart';
-import '../../../../services/cloud/firebase_cloud_storage.dart';
 import '../services/import_product_mixin.dart';
-import '../widgets/upload_product_progress.dart';
+import '../widgets/upload_processed_progress.dart';
 
-class ImportedProducts extends StatelessWidget with ImportPrMixin {
+class ImportedProducts extends StatelessWidget with ImportProcessedMixin {
   const ImportedProducts({super.key});
 
   @override
   Widget build(BuildContext context) {
-    List<CloudProduct> newProducts = [];
+    // List<CloudProduct> newProducts = [];
     List<LocalProduct> cloudStock = [];
     return Scaffold(
       body: CustomScrollView(
         slivers: [
           SliverAppBar.medium(
             backgroundColor: Theme.of(context).colorScheme.surface,
-            title: const Text('Imported Products'),
+            title: const Text('Import Products'),
             centerTitle: true,
             titleTextStyle: Theme.of(context).textTheme.titleLarge!.copyWith(
                   fontWeight: FontWeight.w600,
@@ -75,46 +73,12 @@ class ImportedProducts extends StatelessWidget with ImportPrMixin {
                     box.values.toList().cast<LocalProduct>();
 
                 return box.isEmpty
-                    ? FutureBuilder(
-                        future: FirebaseCloudStorage().getAllStock(),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.done) {
-                            if (snapshot.hasData) {
-                              List<CloudProduct> cloudStock =
-                                  snapshot.data as List<CloudProduct>;
-
-                              newProducts = cloudStock;
-
-                              return const SliverFillRemaining(
-                                child: Center(
-                                  child: Text(
-                                    'Your product list is empty',
-                                  ),
-                                ),
-                              );
-                            } else {
-                              return const SliverToBoxAdapter(
-                                child: Center(
-                                  child: Text(
-                                    'Your cloud stock list is empty',
-                                    style: TextStyle(
-                                      color: Colors.grey,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }
-                          } else {
-                            return const SliverFillRemaining(
-                              child: Center(
-                                child: CircularProgressIndicator(),
-                              ),
-                            );
-                          }
-                        })
+                    ? const SliverFillRemaining(
+                        child: Center(
+                          child: Text('Import products from your device',
+                              textAlign: TextAlign.center),
+                        ),
+                      )
                     : SliverList.builder(
                         itemCount: imported.length,
                         itemBuilder: (context, index) {
@@ -123,8 +87,8 @@ class ImportedProducts extends StatelessWidget with ImportPrMixin {
                           return Card(
                             child: ListTile(
                               title: Text(imported[index].productName),
-                              subtitle:
-                                  Text(imported[index].stockCount.toString()),
+                              subtitle: Text(
+                                  ' ${imported[index].documentId} -- ${imported[index].lastCount.toString()}'),
                               trailing: IconButton(
                                 icon: const Icon(Icons.delete),
                                 onPressed: () async {
@@ -143,7 +107,7 @@ class ImportedProducts extends StatelessWidget with ImportPrMixin {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
           if (HiveBoxes.getTempProductBox.isEmpty) {
-            importProducts(newProducts, context);
+            importProducts(context);
           } else {
             pleaseClear(context);
           }

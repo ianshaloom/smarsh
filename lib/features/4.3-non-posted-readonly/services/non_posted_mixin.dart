@@ -26,7 +26,7 @@ mixin NonPostedMixin {
   int lastStockTake(String id) {
     final LocalProduct p =
         stock.firstWhere((element) => element.documentId == id);
-    return p.stockCount;
+    return p.lastCount;
   }
 
   // Create Filter object for non-posted items
@@ -74,7 +74,7 @@ mixin NonPostedMixin {
         data = [];
       }
 
-      exportCSV.myCSV(headers, listOfLists, sharing: true);
+      exportCSV.myCSV(headers, listOfLists);
     } on Exception catch (e) {
       Snack().showSnackBar(context: context, message: e.toString());
     }

@@ -60,4 +60,4 @@ class GetMeFromHive {
 }
 
 const String profilePhotoUrl =
-    'https://ianshaloom.github.io/assets/img/male-avatar.png';
+    'https://ianshaloom.github.io/assets/img/avatar-male-3.png';

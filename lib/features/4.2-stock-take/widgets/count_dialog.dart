@@ -2,9 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../global/providers/smarsh_providers.dart';
-import '../../../services/cloud/cloud_product.dart';
-import '../../../services/cloud/firebase_cloud_storage.dart';
+import '../../../services/cloud/cloud_entities.dart';
+import '../../../services/cloud/cloud_storage_services.dart';
+import '../../4-home-page/provider/homepage_provider.dart';
 import '../services/stock_taking_mixin.dart';
 
 // SECTION: Add Count Dialog
@@ -25,10 +25,10 @@ class _CountingDialogState extends State<CountingDialog> with StockTakingMixin {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final color = Theme.of(context).colorScheme;
-    CloudUser user = context.read<AppProviders>().user!;
+    CloudUser user = context.read<HomePageProvida>().getUser;
 
     return StreamBuilder(
-      stream: FirebaseCloudStorage()
+      stream: FirestoreProducts()
           .singleProductStream(documentId: widget.product.documentId),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
@@ -47,15 +47,20 @@ class _CountingDialogState extends State<CountingDialog> with StockTakingMixin {
 
         //counts.addAll(cloudCounts);
         return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(0),
+          ),
           insetPadding:
-              const EdgeInsets.only(left: 15, right: 15, top: 0, bottom: 30),
-          child: SizedBox(
-            // height: 400,
-            child: Column(
-              children: [
-                const SizedBox(height: 20),
-                Flexible(
-                  child: Container(
+              const EdgeInsets.only(left: 0, right: 0, top: 0, bottom: 0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Column(
+                children: [
+                  const SizedBox(height: 40),
+                  Container(
+                    width: double.infinity,
+                    height: 130,
                     padding: const EdgeInsets.symmetric(
                         horizontal: 20, vertical: 10),
                     margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -66,193 +71,240 @@ class _CountingDialogState extends State<CountingDialog> with StockTakingMixin {
                           .primaryContainer
                           .withOpacity(0.5),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Flexible(
-                          flex: 3,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Product Name',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleSmall!
-                                    .copyWith(
-                                        fontWeight: FontWeight.w400,
-                                        color: color.primary),
-                              ),
-                              const SizedBox(height: 10),
-                              Text(
-                                cloudCountedProduct.productName,
-                                //textAlign: TextAlign.center,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleSmall!
-                                    .copyWith(
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                              ),
-                            ],
-                          ),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Product Name',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleSmall!
+                                  .copyWith(
+                                      fontWeight: FontWeight.w400,
+                                      color: color.primary),
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              cloudCountedProduct.productName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleSmall!
+                                  .copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                            ),
+                          ],
                         ),
-                        Flexible(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Count',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleSmall!
-                                    .copyWith(
-                                        fontWeight: FontWeight.w400,
-                                        color: color.primary),
+                        const SizedBox(height: 10),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Expected Count',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleSmall!
+                                      .copyWith(
+                                          fontWeight: FontWeight.w400,
+                                          color: color.primary),
+                                ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  getExpectedCount(
+                                          cloudCountedProduct.documentId)
+                                      .toString(),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleSmall!
+                                      .copyWith(fontWeight: FontWeight.w600),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(width: 20),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Counted',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleSmall!
+                                      .copyWith(
+                                          fontWeight: FontWeight.w400,
+                                          color: color.primary),
+                                ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  cloudCountedProduct.totalCount.toString(),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleSmall!
+                                      .copyWith(fontWeight: FontWeight.w600),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Text(
+                    'Recent Counts',
+                    style: textTheme.titleMedium,
+                  ),
+                  SizedBox(
+                    height: 130,
+                    child: countedItems.isEmpty
+                        ? const SizedBox(
+                            height: 150,
+                            child:
+                                Center(child: Text('No counts recorded yet')),
+                          )
+                        : ListView.builder(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            scrollDirection: Axis.horizontal,
+                            itemCount: countedItems.length,
+                            itemBuilder: (context, index) {
+                              return Container(
+                                alignment: Alignment.center,
+                                child: Stack(
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 5,
+                                        vertical: 15,
+                                      ),
+                                      child: CircleAvatar(
+                                          radius: 45,
+                                          // backgroundColor:
+                                          //     countedItems[index].colorValue,
+                                          child: Center(
+                                            child: Text(
+                                              countedItems[index]
+                                                  .count
+                                                  .toString(),
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                color: countedItems[index]
+                                                    .colorValue,
+                                              ),
+                                            ),
+                                          )),
+                                    ),
+                                    Positioned(
+                                      top: -3,
+                                      right: 0,
+                                      child: IconButton(
+                                        icon: Icon(
+                                          CupertinoIcons.clear_circled_solid,
+                                          color: countedItems[index].colorValue,
+                                        ),
+                                        onPressed: () {
+                                          if (user.role == 'admin') {
+                                            _removeCount(
+                                                cloudCountedProduct, index);
+                                          } else {
+                                            (user.color !=
+                                                    countedItems[index].color)
+                                                ? null
+                                                : _removeCount(
+                                                    cloudCountedProduct, index);
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                  ),
+                  // row with total count and add button
+                  Container(
+                    height: 40,
+                    margin: const EdgeInsets.only(left: 20, right: 20, top: 5),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Form(
+                            key: _formKey,
+                            child: TextFormField(
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.titleLarge,
+                              readOnly: true,
+                              autocorrect: false,
+                              controller: _countContoller,
+                              decoration: InputDecoration(
+                                suffixIcon: GestureDetector(
+                                  child: const Icon(Icons.backspace),
+                                  onTap: () {
+                                    if (_countContoller.text.isNotEmpty) {
+                                      _countContoller.text =
+                                          _countContoller.text.substring(0,
+                                              _countContoller.text.length - 1);
+                                    }
+                                  },
+                                  onLongPress: () {
+                                    _countContoller.clear();
+                                  },
+                                ),
+                                border: InputBorder.none,
                               ),
-                              const SizedBox(height: 10),
-                              Text(
-                                cloudCountedProduct.totalCount.toString(),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleSmall!
-                                    .copyWith(fontWeight: FontWeight.w600),
-                              ),
-                            ],
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter count';
+                                }
+                                return null;
+                              },
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                Text(
-                  'Recent Counts',
-                  style: textTheme.titleMedium,
-                ),
-                Flexible(
-                  flex: 1,
-                  child: countedItems.isEmpty
-                      ? const SizedBox(
-                          height: 150,
-                          child: Center(child: Text('No counts recorded yet')),
-                        )
-                      : ListView.builder(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          scrollDirection: Axis.horizontal,
-                          itemCount: countedItems.length,
-                          itemBuilder: (context, index) {
-                            return Center(
-                              child: Stack(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 5),
-                                    child: CircleAvatar(
-                                        radius: 45,
-                                        // backgroundColor:
-                                        //     countedItems[index].colorValue,
-                                        child: Center(
-                                          child: Text(
-                                            countedItems[index]
-                                                .count
-                                                .toString(),
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              color: countedItems[index]
-                                                  .colorValue,
-                                            ),
-                                          ),
-                                        )),
-                                  ),
-                                  Positioned(
-                                    top: -10,
-                                    right: 0,
-                                    child: IconButton(
-                                      icon: Icon(
-                                        CupertinoIcons.clear_circled_solid,
-                                        color: countedItems[index].colorValue,
-                                      ),
-                                      onPressed: () {
-                                        (user.color !=
-                                                countedItems[index].color)
-                                            ? null
-                                            : _removeCount(
-                                                cloudCountedProduct, index);
-                                      },
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                ),
-                // row with total count and add button
-                Container(
-                  margin: const EdgeInsets.only(
-                      left: 20, right: 20, bottom: 0, top: 15),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Form(
-                          key: _formKey,
-                          child: TextFormField(
-                            textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.titleLarge,
-                            readOnly: true,
-                            autocorrect: false,
-                            controller: _countContoller,
-                            decoration: InputDecoration(
-                              suffixIcon: GestureDetector(
-                                child: const Icon(Icons.backspace),
-                                onTap: () {
-                                  if (_countContoller.text.isNotEmpty) {
-                                    _countContoller.text = _countContoller.text
-                                        .substring(
-                                            0, _countContoller.text.length - 1);
-                                  }
-                                },
-                                onLongPress: () {
-                                  _countContoller.clear();
-                                },
-                              ),
-                              border: InputBorder.none,
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter count';
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
-                      ),
-                    ],
+                  _numberKeypad(cloudCountedProduct),
+                ],
+              ),
+              const Spacer(),
+              Padding(
+                padding: const EdgeInsets.only(left: 10, right: 10, top: 10),
+                child: FilledButton(
+                  onPressed: () =>
+                      _addCount(cloudCountedProduct, context, user.color),
+                  style: FilledButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    minimumSize: const Size.fromHeight(60),
+                  ),
+                  child: const Text(
+                    'Add Count',
                   ),
                 ),
-                Flexible(
-                  flex: 4,
-                  child: _numberKeypad(cloudCountedProduct, user.color),
-                ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 10),
+            ],
           ),
         );
-        //} else {
-        //  return const Center(child: Text('No data found'));
-        //}
       },
     );
   }
 
-  Widget _numberKeypad(CloudProduct product, String color) {
+  Widget _numberKeypad(CloudProduct product) {
     return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
       children: [
         const SizedBox(height: 20),
         Row(
@@ -296,21 +348,7 @@ class _CountingDialogState extends State<CountingDialog> with StockTakingMixin {
             ),
           ],
         ),
-        Padding(
-          padding: const EdgeInsets.only(left: 10, right: 10, top: 10),
-          child: FilledButton(
-            onPressed: () => _addCount(product, context, color),
-            style: FilledButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              minimumSize: const Size.fromHeight(60),
-            ),
-            child: const Text(
-              'Add Count',
-            ),
-          ),
-        ),
+        const SizedBox(height: 10),
       ],
     );
   }

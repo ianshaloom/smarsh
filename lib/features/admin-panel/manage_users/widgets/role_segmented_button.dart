@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../../services/cloud/cloud_product.dart';
-import '../services/manage_user_mixin.dart';
+import '../../../../services/cloud/cloud_entities.dart';
+import '../services/manage_users_mixin.dart';
 
 class SelectRole extends StatefulWidget {
   final CloudUser user;
@@ -13,7 +13,7 @@ class SelectRole extends StatefulWidget {
 
 enum Roles { admin, manager, supervisor, user }
 
-class _SelectRoleState extends State<SelectRole> with ManageUserMixin {
+class _SelectRoleState extends State<SelectRole> with ManageUsersMixin {
   late Roles rolesView;
 
   @override
@@ -25,20 +25,21 @@ class _SelectRoleState extends State<SelectRole> with ManageUserMixin {
   @override
   Widget build(BuildContext context) {
     return SegmentedButton<Roles>(
+      showSelectedIcon: false,
       segments: const <ButtonSegment<Roles>>[
         ButtonSegment<Roles>(
           value: Roles.admin,
-          label: Text('Admin', style: TextStyle(fontSize: 12)),
+          label: Text('Admin', style: TextStyle(fontSize: 11)),
           // icon: Icon(Icons.Roles_view_day),
         ),
         ButtonSegment<Roles>(
           value: Roles.supervisor,
-          label: Text('Supervisor', style: TextStyle(fontSize: 12)),
+          label: Text('Supervisor', style: TextStyle(fontSize: 11)),
           // icon: Icon(Icons.Roles_view_month),
         ),
         ButtonSegment<Roles>(
           value: Roles.user,
-          label: Text('User', style: TextStyle(fontSize: 12)),
+          label: Text('User', style: TextStyle(fontSize: 11)),
           // icon: Icon(Icons.Roles_today),
         ),
       ],

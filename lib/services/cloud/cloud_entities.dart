@@ -89,6 +89,16 @@ class CloudUser {
   //   }
   // }
 
+  static final CloudUser empty = CloudUser(
+    userId: '',
+    username: '',
+    email: '',
+    role: '',
+    url: '',
+    signInProvider: '',
+    color: '',
+  );
+
   CloudUser({
     required this.userId,
     required this.username,
@@ -120,18 +130,48 @@ class CloudUser {
         color = documentSnapshot['color'];
 }
 
+class CloudProcessed{
+  final String documentId;
+  final String productName;
+  final int expectedCount;
+
+  CloudProcessed({
+    required this.documentId,
+    required this.productName,
+    required this.expectedCount,
+  });
+
+  CloudProcessed.fromDocSnapshot(
+      {required DocumentSnapshot<Map<String, dynamic>> documentSnapshot})
+      : documentId = documentSnapshot.id,
+        productName = documentSnapshot['productName'],
+        expectedCount = documentSnapshot['expectedCount'];
+
+  CloudProcessed.fromQuerySnapshot(
+      {required QueryDocumentSnapshot<Map<String, dynamic>> documentSnapshot})
+      : documentId = documentSnapshot.id,
+        productName = documentSnapshot['productName'],
+        expectedCount = documentSnapshot['expectedCount'];
+
+
+}
+
 class ItemCount {
   final String color;
   final int count;
   Color get colorValue {
-    if (color == 'green') {
+    if (color == 'brown') {
       return c1;
-    } else if (color == 'blue') {
-      return c2;
     } else if (color == 'orange') {
+      return c2;
+    } else if (color == 'purple') {
       return c3;
-    } else {
+    } else if (color == 'blue') {
       return c4;
+    } else if (color == 'red') {
+      return c6;
+    } else {
+      return c5;
     }
   }
 

@@ -2,24 +2,94 @@
 
 import 'dart:io';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
+import 'package:file_picker/file_picker.dart';
+
 import '../../../../global/helpers/snacks.dart';
-import '../../../../services/hive/models/processed_stock_model/processed_stock.dart';
 import '../../../../global/utils/shared_classes.dart';
-import '../../../../services/cloud/cloud_product.dart';
+import '../../../../services/cloud/cloud_storage_exceptions.dart';
+import '../../../../services/cloud/cloud_storage_services.dart';
+import '../../../../services/hive/models/local_product_model/local_product_model.dart';
+import '../../../../services/hive/models/processed_stock_model/processed_stock.dart';
+import '../../../../services/hive/service/hive_constants.dart';
 import '../../../../services/hive/service/hive_service.dart';
+import '../widgets/clear_processed_progress.dart';
+import '../widgets/upload_product_progress.dart';
 
 mixin ProcessedDataMixin {
-  // Fetch file
-  Stream<int> importingPr(
-      List<CloudProduct> products, BuildContext context) async* {
+  Stream<int> uploadingProcessed(BuildContext context) async* {
     try {
-      // clear product box
-      await HiveProcessedData().deleteAllProcessedData();
+      List<ProcessedData> imported = GetMeFromHive.getAllProcessedData;
 
-      // pick file from device
+      for (int i = 0; i < imported.length; i++) {
+        final ProcessedData p = imported[i];
+
+        await FirestoreProcessed().createProcessed(
+          documentId: p.documentId,
+          productName: p.productName,
+          expectedCount: p.stockCount,
+        );
+
+        yield ((i / imported.length) * 100).round();
+      }
+    } on CouldNotCreateException {
+      Snack().showSnackBar(context: context, message: 'Could not syn to cloud');
+    }
+  }
+
+  Stream<int> clearingProcessed(BuildContext context) async* {
+    List<ProcessedData> imported = GetMeFromHive.getAllProcessedData;
+    try {
+      for (int i = 0; i < imported.length; i++) {
+        final ProcessedData p = imported[i];
+        await FirestoreProcessed().deleteProcessed(documentId: p.documentId);
+
+        // pop context on last iteration
+        yield ((i / imported.length) * 100).round();
+      }
+    } on CouldNotDeleteException {
+      Snack().showSnackBar(
+          context: context, message: 'Could not delete from cloud');
+    }
+  }
+
+  String getProductId(List<LocalProduct> pr, String productName) {
+    final LocalProduct cp = pr.firstWhere(
+        (element) => element.productName.trim() == productName.trim(),
+        orElse: () => LocalProduct(
+              documentId: '${Processors.generateCode(3)}-new',
+              productName: productName,
+              wholesale: 0,
+              retail: 0,
+              todaysCount: 0,
+              lastCount: 0,
+            ));
+
+    return cp.documentId;
+  }
+
+  // return bool if ProcessedData id contains 'new'
+  bool isNew(String id) {
+    return id.contains('new');
+  }
+
+  Future<void> clearProcessed(BuildContext context) async {
+    try {
+      if (HiveBoxes.getProcessedDataBox.isEmpty) return;
+
+      await HiveProcessedData().deleteAllProcessedData();
+    } on CouldNotDeleteException {
+      Snack().showSnackBar(
+          context: context, message: 'Could not delete from cloud');
+    }
+  }
+
+  // snack bar
+  void importPr(BuildContext context) async {
+    List<LocalProduct> newProducts = await HiveLocalProduct().getAllProducts();
+
+    try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['csv'],
@@ -31,7 +101,7 @@ mixin ProcessedDataMixin {
         String csv = file.readAsStringSync();
 
         var listOne = csv.split('\n');
-        listOne.removeLast();
+        listOne.removeWhere((element) => element.isEmpty);
 
         List listTwo = [];
         for (var element in listOne) {
@@ -42,16 +112,15 @@ mixin ProcessedDataMixin {
           var row = listTwo[i];
 
           final String productName = row[0].toString().trim();
-          final int stockCount = int.parse(row[1].toString().trim());
+          final int expectedCount = int.parse(row[1].toString().trim());
 
           final localProduct = ProcessedData(
-            documentId: getProductId(products, productName),
+            documentId: getProductId(newProducts, productName),
             productName: productName,
-            stockCount: stockCount,
+            stockCount: expectedCount,
           );
 
           await HiveProcessedData().addProcessedData(localProduct);
-          yield ((i / listTwo.length) * 100).round();
 
           if (i == listTwo.length - 1) {
             Snack().showSnackBar(
@@ -67,82 +136,74 @@ mixin ProcessedDataMixin {
         );
       }
     } catch (e) {
-      //
+      Snack().showSnackBar(
+        context: context,
+        message: e.toString(),
+      );
     }
   }
 
-  String getProductId(List<CloudProduct> pr, String productName) {
-    final CloudProduct cp = pr.firstWhere(
-        (element) => element.productName.trim() == productName.trim(),
-        orElse: () => CloudProduct(
-              documentId: '${Processors.generateCode(10)}-new',
-              productName: productName,
-              buyingPrice: 0,
-              sellingPrice: 0,
-              stockCount: 0,
-            ));
-
-    return cp.documentId;
-  }
-
-  // return bool if ProcessedData id contains 'new'
-  bool isNew(String id) {
-    return id.contains('new');
-  }
-
-  // add products to cloud
-  // Stream<int> uploadingPr(
-  //     List<LocalProduct> products, BuildContext context) async* {
-  //   try {
-  //     for (int i = 0; i < products.length; i++) {
-  //       final LocalProduct product = products[i];
-  //       await FirebaseCloudStorage().createProduct(
-  //         documentId: product.documentId,
-  //         productName: product.productName,
-  //         buyingPrice: product.buyingPrice,
-  //         sellingPrice: product.sellingPrice,
-  //         stockCount: product.stockCount,
-  //       );
-
-  //       // pop context on last iteration
-  //       yield ((i / products.length) * 100).round();
-  //     }
-  //   } on CouldNotCreateException {
-  //     Snack().showSnackBar(context: context, message: 'Could not syn to cloud');
-  //   }
-  // }
-
-  Future confirmClearProcessed(BuildContext context) async {
-    final confirm = await showDialog(
-      context: context,
+  void confirmClear(BuildContext cxt) async {
+    final bool confirm = await showDialog(
+      context: cxt,
       builder: (context) => AlertDialog(
-        title: const Text('Clear Processed Data'),
+        title: const Text('Clear Processed'),
         content: const Text(
-          'Are you sure you want to clear all processed data?',
-        ),
+            'Are you sure you want to clear the cloud processed data?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('No'),
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Yes'),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Clear'),
           ),
         ],
       ),
     );
 
-    if (confirm == true) {
-      await HiveProcessedData().deleteAllProcessedData();
+    if (confirm) {
+      // reset stock-take
+      showDialog(
+        barrierColor: Colors.black38,
+        context: cxt,
+        barrierDismissible: false,
+        builder: (_) => const ClearProcessedProgress(),
+        // builder: (_) => const Center(),
+      );
     }
   }
 
-  // snack bar
-  void pleaseClear(BuildContext context) {
-    Snack().showSnackBar(
-      context: context,
-      message: 'Please clear imported data before importing new data',
+  void confirmUpload(BuildContext cxt) async {
+    final bool confirm = await showDialog(
+      context: cxt,
+      builder: (context) => AlertDialog(
+        title: const Text('Upload Processed'),
+        content:
+            const Text('Are you sure you want to upload cloud processed data?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Upload'),
+          ),
+        ],
+      ),
     );
+
+    if (confirm) {
+      // reset stock-take
+      showDialog(
+        barrierColor: Colors.black38,
+        context: cxt,
+        barrierDismissible: false,
+        builder: (_) => const ProcessedUploadProgress(),
+        // builder: (_) => const Center(),
+      );
+    }
   }
 }

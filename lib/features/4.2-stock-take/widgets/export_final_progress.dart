@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../services/cloud/cloud_product.dart';
+import '../../../services/cloud/cloud_entities.dart';
 import '../services/stock_taking_mixin.dart';
 
 class FinalExportProgress extends StatefulWidget {
